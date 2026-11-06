@@ -382,11 +382,11 @@ img {
 }
 
 .logo {
-  width: 140px;
-  height: 140px;
+  width: 88px;
+  height: 88px;
   object-fit: cover;
-  border-radius: 32px;
-  margin-bottom: 24px;
+  border-radius: 20px;
+  margin-bottom: 16px;
 }
 
 .header-brand-logo {
