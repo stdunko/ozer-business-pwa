@@ -563,6 +563,10 @@ img {
   padding: 16px 16px 8px;
 }
 
+[hidden] {
+  display: none !important;
+}
+
 .grid {
   display: grid;
   grid-template-columns: 1fr 1fr;
@@ -980,7 +984,7 @@ html[dir="rtl"] .bubble.in {
   position: fixed;
   inset: 0;
   background: rgba(0, 0, 0, 0.45);
-  z-index: 40;
+  z-index: 80;
   display: flex;
   align-items: flex-end;
   justify-content: center;
@@ -996,9 +1000,10 @@ html[dir="rtl"] .bubble.in {
   background: var(--surface);
   border-top-left-radius: var(--radius-xl);
   border-top-right-radius: var(--radius-xl);
-  max-height: 88vh;
+  max-height: calc(100dvh - 12px);
   display: flex;
   flex-direction: column;
+  padding-bottom: var(--safe-bottom);
 }
 
 .modal-card {
@@ -1022,12 +1027,38 @@ html[dir="rtl"] .bubble.in {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 8px 24px 8px;
+  gap: 8px;
+  padding: 8px 16px 8px 24px;
 }
 
 .sheet-title {
+  flex: 1;
+  min-width: 0;
   font-size: 18px;
   font-weight: 700;
+  line-height: 1.25;
+}
+
+.sheet-search {
+  padding: 0 16px;
+}
+
+.sheet-search .field {
+  margin-bottom: 8px;
+}
+
+.sheet-hint {
+  padding: 0 24px 8px;
+}
+
+.sheet-grid {
+  padding: 8px 0 16px;
+}
+
+.sheet-footer-stack {
+  flex-direction: column;
+  gap: 4px;
+  padding-bottom: 12px;
 }
 
 .sheet-body {

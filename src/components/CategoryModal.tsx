@@ -1,6 +1,10 @@
-import { Check, Grid3x3, X } from "lucide-react";
+import { useEffect, useMemo, useState } from "react";
+import { createPortal } from "react-dom";
+import { Check, Search, X } from "lucide-react";
 import { useTranslation } from "react-i18next";
 import type { CategoryType } from "../types/category";
+import AppTextInput from "./AppTextInput";
+import CategoryIcon from "./CategoryIcon";
 import PrimaryButton from "./PrimaryButton";
 
 type CategoryModalProps = {
@@ -21,13 +25,28 @@ const CategoryModal = ({
   onClose,
 }: CategoryModalProps) => {
   const { t } = useTranslation();
+  const [search, setSearch] = useState("");
   const selectedCount = selectedCategories.length;
+
+  useEffect(() => {
+    if (!isVisible) {
+      setSearch("");
+    }
+  }, [isVisible]);
+
+  const filtered = useMemo(() => {
+    const query = search.trim().toLowerCase();
+    if (!query) {
+      return categories;
+    }
+    return categories.filter((item) => item.name.toLowerCase().includes(query));
+  }, [categories, search]);
 
   if (!isVisible) {
     return null;
   }
 
-  return (
+  return createPortal(
     <div className="modal-backdrop" onClick={onClose}>
       <div className="sheet" onClick={(e) => e.stopPropagation()}>
         <div className="handle" />
@@ -37,17 +56,24 @@ const CategoryModal = ({
             <X size={22} />
           </button>
         </div>
-        <p className="hint" style={{ padding: "0 24px", marginBottom: 8 }}>
-          {selectedCount > 0 ? `${t("add")}: ${selectedCount}` : t("yourCategories")}
-        </p>
+        <div className="sheet-search">
+          <AppTextInput
+            icon={Search}
+            placeholder={t("searchCategories")}
+            value={search}
+            onChange={(e) => setSearch(e.target.value)}
+          />
+        </div>
+        {selectedCount > 0 ? (
+          <p className="hint sheet-hint">{t("add")}: {selectedCount}</p>
+        ) : null}
         <div className="sheet-body">
-          {categories.length === 0 ? (
-            <p className="empty">{t("yourCategories")}</p>
+          {filtered.length === 0 ? (
+            <p className="empty">{search.trim() ? t("categoriesNotFound") : t("yourCategories")}</p>
           ) : (
-            <div className="grid" style={{ padding: "8px 0 16px" }}>
-              {categories.map((item) => {
+            <div className="grid sheet-grid">
+              {filtered.map((item) => {
                 const isSelected = selectedCategories.some((cat) => cat.id === item.id);
-                const icon = item.iconName || item.icon;
                 return (
                   <button
                     key={item.id}
@@ -56,7 +82,7 @@ const CategoryModal = ({
                     onClick={() => onCategorySelect(item)}
                   >
                     <div className="category-icon">
-                      {icon ? <img src={icon} alt="" /> : <Grid3x3 size={28} />}
+                      <CategoryIcon iconUrl={item.icon || item.iconName} categoryName={item.name} />
                     </div>
                     <div className="category-name">{item.name}</div>
                     {isSelected ? (
@@ -70,12 +96,15 @@ const CategoryModal = ({
             </div>
           )}
         </div>
-        <div className="sheet-footer" style={{ flexDirection: "column" }}>
+        <div className="sheet-footer sheet-footer-stack">
           <PrimaryButton title={t("add")} onPress={onAddCategories} disabled={selectedCount === 0} />
-          <PrimaryButton title={t("close")} variant="secondary" onPress={onClose} />
+          <button type="button" className="profile-text-btn" onClick={onClose}>
+            {t("close")}
+          </button>
         </div>
       </div>
-    </div>
+    </div>,
+    document.body
   );
 };
 

@@ -10,7 +10,13 @@ import { useAppDispatch, useAppSelector } from "../store/hooks";
 import { setChatUnread } from "../store/liveSlice";
 import { notifyIfHidden } from "../hooks/usePushNotifications";
 
-const RenderChatUser = ({ item }: { item: Chat }) => {
+const RenderChatUser = ({
+  item,
+  onPreview,
+}: {
+  item: Chat;
+  onPreview?: (chatId: string, text: string) => void;
+}) => {
   const { t, i18n } = useTranslation();
   const dispatch = useAppDispatch();
   const executorId = useAppSelector((state) => state.executor.id);
@@ -39,6 +45,12 @@ const RenderChatUser = ({ item }: { item: Chat }) => {
     });
     return unsubscribe;
   }, [dispatch, executorId, item.id, t]);
+
+  useEffect(() => {
+    if (lastMessage) {
+      onPreview?.(item.id, lastMessage);
+    }
+  }, [item.id, lastMessage, onPreview]);
 
   useEffect(() => {
     if (unread > prevUnread.current) {
