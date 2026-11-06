@@ -15,12 +15,12 @@ const GreetingScreen = () => {
     <div className="screen auth-screen">
       <AppHeader
         title="OzerilBusiness"
-        avatar={<img src="/logo.png" alt="" className="header-brand-logo" />}
+        avatar={<span className="header-brand-mark" aria-hidden="true" />}
       />
       <div className="auth-body">
         <div className="auth-hero">
           <div className="auth-hero-icon">
-            <img src="/logo.png" alt="" className="auth-hero-logo" />
+            <div className="auth-hero-mark" aria-hidden="true" />
           </div>
           <h2 className="auth-title">OzerilBusiness</h2>
           <p className="auth-subtitle">{t("logInFooterText")}</p>

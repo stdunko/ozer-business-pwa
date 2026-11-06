@@ -147,7 +147,7 @@ const OrderDetailScreen = () => {
       ) : (
         <div className="scroll">
           {showMap ? (
-            <div className="order-detail-map">
+            <div className="map-wrap">
               <MapView
                 latitude={order.latitude as number}
                 longitude={order.longitude as number}
@@ -156,40 +156,40 @@ const OrderDetailScreen = () => {
               />
             </div>
           ) : null}
-          <div className="order-detail-body">
-            <div className="order-detail-hero">
-              <div className="order-detail-cat-icon">
-                <CategoryIcon categoryName={order.category?.name} size={26} />
-              </div>
-              <div className="order-detail-hero-text">
-                <div className="order-detail-cat">{order.category?.name}</div>
+          <div className="pad">
+            <div className="order-card order-detail-card">
+              <div className="order-top">
+                <div className="order-detail-head">
+                  <span className="picker-row-icon">
+                    <CategoryIcon categoryName={order.category?.name} size={22} />
+                  </span>
+                  <span>
+                    <div className="order-no">{t("orderNumber", { n: order.id })}</div>
+                    <div className="order-cat">{order.category?.name}</div>
+                  </span>
+                </div>
                 <span className={`badge ${statusClass}`}>{statusLabel}</span>
               </div>
-            </div>
-            <div className="order-detail-price">{order.price} ₪</div>
-            {createdAtLabel ? (
-              <div className="order-detail-meta">
-                {t("orderCreatedAt")}: {createdAtLabel}
-              </div>
-            ) : null}
-            <div className="order-detail-block">
-              <div className="order-detail-label">{t("description")}</div>
-              <p className="order-detail-text">{order.description}</p>
-            </div>
-            {order.user ? (
-              <div className="order-detail-block order-detail-person">
-                <PersonAvatar
-                  className="order-detail-avatar"
-                  name={order.user.name}
-                  userId={order.user.id}
-                />
-                <div>
-                  <div className="order-detail-label">{t("customer")}</div>
-                  <div className="order-detail-name">{order.user.name}</div>
-                  {order.user.phone ? <div className="order-detail-meta">{order.user.phone}</div> : null}
+              {createdAtLabel ? (
+                <div className="muted">
+                  {t("orderCreatedAt")}: {createdAtLabel}
                 </div>
+              ) : null}
+              <p className="order-desc">{order.description}</p>
+              {order.user ? (
+                <div className="executor-box">
+                  <PersonAvatar className="executor-avatar" name={order.user.name} userId={order.user.id} />
+                  <div>
+                    <div className="muted">{t("customer")}</div>
+                    <div className="executor-name">{order.user.name}</div>
+                    {order.user.phone ? <div className="muted">{order.user.phone}</div> : null}
+                  </div>
+                </div>
+              ) : null}
+              <div className="order-footer">
+                <div className="price">{order.price} ₪</div>
               </div>
-            ) : null}
+            </div>
             <div className="order-detail-actions">
               {order.user?.id ? (
                 <button type="button" className="btn btn-secondary" onClick={() => void handlePressChat()} disabled={chatLoading}>

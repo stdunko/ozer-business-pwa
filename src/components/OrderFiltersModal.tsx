@@ -10,7 +10,7 @@ import {
   type OrderFiltersState,
   type PriceSort,
 } from "../types/order";
-import { hasActiveOrderFilters, type OrderCategoryOption } from "../utils/orderUtils";
+import { type OrderCategoryOption } from "../utils/orderUtils";
 
 type OrderFiltersModalProps = {
   isVisible: boolean;
@@ -194,14 +194,7 @@ const OrderFiltersModal = ({
             </div>
           </FilterSection>
         </div>
-        <div className="sheet-footer">
-          {hasActiveOrderFilters(draft) ? (
-            <button type="button" className="reset-btn" onClick={() => setDraft(defaultOrderFilters)}>
-              {t("resetFilters")}
-            </button>
-          ) : (
-            <span />
-          )}
+        <div className="sheet-footer sheet-footer-stack">
           <PrimaryButton
             className="sheet-apply"
             title={t("applyFilters")}
@@ -210,7 +203,16 @@ const OrderFiltersModal = ({
               onClose();
             }}
           />
-          <span />
+          <button
+            type="button"
+            className="reset-btn"
+            onClick={() => {
+              setDraft(defaultOrderFilters);
+              onApply(defaultOrderFilters);
+            }}
+          >
+            {t("resetFilters")}
+          </button>
         </div>
       </div>
     </div>
