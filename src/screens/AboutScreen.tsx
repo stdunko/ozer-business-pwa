@@ -8,35 +8,25 @@ const AboutScreen = () => {
     <div className="screen">
       <AppHeader title={t("aboutTitle")} back />
       <div className="scroll pad">
-        <h2 className="title-md" style={{ textAlign: "start" }}>
-          {t("aboutWorksTitle")}
-        </h2>
-        <ul className="about-list">
-          <li>{t("aboutWorks1")}</li>
-          <li>{t("aboutWorks2")}</li>
-          <li>{t("aboutWorks3")}</li>
-          <li>{t("aboutWorks4")}</li>
-          <li>{t("aboutWorks5")}</li>
-        </ul>
-
-        <h2 className="title-md" style={{ textAlign: "start", marginTop: 24 }}>
-          {t("aboutBrokenTitle")}
-        </h2>
-        <ul className="about-list">
-          <li>{t("aboutBroken1")}</li>
-          <li>{t("aboutBroken2")}</li>
-          <li>{t("aboutBroken3")}</li>
-          <li>{t("aboutBroken4")}</li>
-        </ul>
-
-        <h2 className="title-md" style={{ textAlign: "start", marginTop: 24 }}>
-          {t("aboutFixTitle")}
-        </h2>
-        <ul className="about-list">
-          <li>{t("aboutFix1")}</li>
-          <li>{t("aboutFix2")}</li>
-          <li>{t("aboutFix3")}</li>
-        </ul>
+        <p className="about-lead">{t("aboutLead")}</p>
+        <div className="profile-card about-card">
+          <a className="about-row" href="mailto:info@ozer.co.il">
+            <span className="muted">{t("contactEmail")}</span>
+            <span>info@ozer.co.il</span>
+          </a>
+          <a className="about-row" href="mailto:support@ozer.co.il">
+            <span className="muted">{t("contactSupport")}</span>
+            <span>support@ozer.co.il</span>
+          </a>
+          <a className="about-row" href="mailto:privacy@ozer.co.il">
+            <span className="muted">{t("contactPrivacy")}</span>
+            <span>privacy@ozer.co.il</span>
+          </a>
+          <a className="about-row" href="https://ozer.co.il" target="_blank" rel="noreferrer">
+            <span className="muted">{t("contactWeb")}</span>
+            <span>ozer.co.il</span>
+          </a>
+        </div>
       </div>
     </div>
   );

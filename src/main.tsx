@@ -9,8 +9,10 @@ import { store } from "./store/store";
 import i18n from "./services/i18n";
 import { bootstrapAppLanguage } from "./services/i18n/changeLanguage";
 import { AppNotifierProvider } from "./components/AppNotifier";
+import { initPwaInstallCapture } from "./pwaInstall";
 import "./index.css";
 
+initPwaInstallCapture();
 registerSW({ immediate: true });
 
 const root = createRoot(document.getElementById("root")!);

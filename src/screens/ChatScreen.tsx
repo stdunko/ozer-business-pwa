@@ -16,10 +16,12 @@ import {
   writeBatch,
 } from "firebase/firestore";
 import { db } from "../firebase";
-import { useAppSelector } from "../store/hooks";
+import { useAppDispatch, useAppSelector } from "../store/hooks";
+import { setChatUnread } from "../store/liveSlice";
 import { compressImageFile } from "../utils/image";
 import type { Chat } from "../types/chat";
 import AppHeader from "../components/AppHeader";
+import PersonAvatar from "../components/PersonAvatar";
 
 type ChatMessage = {
   _id: string;
@@ -51,6 +53,7 @@ const ChatScreen = () => {
   const location = useLocation();
   const chat = (location.state as { chat?: Chat } | null)?.chat;
   const executor = useAppSelector((state) => state.executor);
+  const dispatch = useAppDispatch();
   const [messages, setMessages] = useState<ChatMessage[]>([]);
   const [text, setText] = useState("");
   const [preview, setPreview] = useState("");
@@ -77,7 +80,10 @@ const ChatScreen = () => {
       batch.update(docSnap.ref, { [`isRead.${executor.id}`]: true });
     });
     await batch.commit();
-  }, [chatId, executor.id]);
+    if (chatId) {
+      dispatch(setChatUnread({ chatId, unread: 0 }));
+    }
+  }, [chatId, dispatch, executor.id]);
 
   useLayoutEffect(() => {
     if (!chatId) {
@@ -156,6 +162,7 @@ const ChatScreen = () => {
       });
       await updateDoc(doc(db, "chats", chatId), {
         lastMessageTimestamp: Timestamp.fromDate(createdAt),
+        lastMessageText: payloadText || (imageToSend ? t("image") : ""),
       });
     } finally {
       setSendingIds((prev) => prev.filter((id) => id !== tempId));
@@ -173,7 +180,18 @@ const ChatScreen = () => {
 
   return (
     <div className="screen">
-      <AppHeader title={title} back />
+      <AppHeader
+        title={title}
+        back
+        avatar={
+          <PersonAvatar
+            className="header-avatar"
+            name={title}
+            photo={anotherUser?.photo}
+            userId={anotherUser?.user_id}
+          />
+        }
+      />
       {chronological.length === 0 ? (
         <div className="center-col">
           <div className="category-icon" style={{ width: 72, height: 72, borderRadius: 36, marginBottom: 16 }}>

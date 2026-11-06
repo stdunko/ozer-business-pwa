@@ -16,7 +16,7 @@ const OnboardingScreen = ({ onComplete }: { onComplete: () => void }) => {
 
   if (step === 0) {
     return (
-      <div className="screen screen-surface pad-lg">
+      <div className="screen screen-surface pad-lg status-bar-fill">
         <div className="center-col">
           <img src="/logo.png" alt="Ozer Business" className="logo" style={{ width: 120, height: 120 }} />
           <h1 className="title-lg">{t("onboardingWelcomeTitle")}</h1>
@@ -38,7 +38,7 @@ const OnboardingScreen = ({ onComplete }: { onComplete: () => void }) => {
   const isLast = step === 3;
 
   return (
-    <div className="screen screen-surface pad-lg">
+    <div className="screen screen-surface pad-lg status-bar-fill">
       {isLast ? (
         <div style={{ height: 36 }} />
       ) : (

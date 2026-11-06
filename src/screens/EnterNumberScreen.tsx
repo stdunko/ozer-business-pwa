@@ -1,13 +1,13 @@
 import { useState } from "react";
 import { useTranslation } from "react-i18next";
 import { useNavigate } from "react-router-dom";
-import { ArrowRight, ChevronDown } from "lucide-react";
+import { ChevronDown, Smartphone } from "lucide-react";
 import { authLogin, authRegister } from "../services/api";
 import { useNotifier } from "../components/AppNotifier";
-import { useRtl } from "../hooks/useRtl";
 import AppHeader from "../components/AppHeader";
 import CountryFlag from "../components/CountryFlag";
 import CountryPicker from "../components/CountryPicker";
+import PrimaryButton from "../components/PrimaryButton";
 import {
   DEFAULT_COUNTRY,
   normalizePhoneInput,
@@ -20,7 +20,6 @@ const EnterNumberScreen = () => {
   const { t } = useTranslation();
   const navigate = useNavigate();
   const { showApiError } = useNotifier();
-  const { isRtl } = useRtl();
   const [phone, setPhone] = useState(`+${DEFAULT_COUNTRY.dial}`);
   const [country, setCountry] = useState<Country>(DEFAULT_COUNTRY);
   const [isPickerOpen, setIsPickerOpen] = useState(false);
@@ -54,12 +53,18 @@ const EnterNumberScreen = () => {
   };
 
   return (
-    <div className="screen">
-      <AppHeader title={t("logInNumberText")} back />
-      <div className="pad grow">
-        <p className="hint">{t("logInNumberUnderText")}</p>
-        <div className="phone-row">
-          <div className="phone-input">
+    <div className="screen auth-screen">
+      <AppHeader title="" back />
+      <div className="auth-body">
+        <div className="auth-hero">
+          <div className="auth-hero-icon">
+            <Smartphone size={36} />
+          </div>
+          <h2 className="auth-title">{t("logInNumberText")}</h2>
+          <p className="auth-subtitle">{t("logInNumberUnderText")}</p>
+        </div>
+        <div className="auth-card">
+          <div className="phone-input phone-input-lg">
             <button
               type="button"
               className="phone-flag-btn"
@@ -79,20 +84,14 @@ const EnterNumberScreen = () => {
               inputMode="tel"
             />
           </div>
-          <button
-            type="button"
-            className="entry-btn"
-            disabled={phone.length < 5 || isLoading}
-            onClick={handleContinue}
-          >
-            {isLoading ? (
-              <span className="spinner" style={{ borderTopColor: "#fff", width: 18, height: 18 }} />
-            ) : (
-              <ArrowRight size={22} style={{ transform: isRtl ? "scaleX(-1)" : undefined }} />
-            )}
-          </button>
+          <PrimaryButton
+            title={t("continue")}
+            onPress={handleContinue}
+            loading={isLoading}
+            disabled={phone.length < 8 || isLoading}
+          />
         </div>
-        <p className="hint">{t("logInNumberFooterText")}</p>
+        <p className="auth-footnote">{t("logInNumberFooterText")}</p>
       </div>
       <CountryPicker
         isVisible={isPickerOpen}

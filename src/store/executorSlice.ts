@@ -6,6 +6,7 @@ export interface ExecutorState {
   name?: string | null;
   email?: string | null;
   phone: string;
+  photo?: string | null;
   status?: number;
   latitude?: number;
   longitude?: number;
@@ -21,6 +22,7 @@ const initialState: ExecutorState = {
   name: null,
   email: null,
   phone: "",
+  photo: null,
   status: 0,
   latitude: 0,
   longitude: 0,
@@ -42,6 +44,7 @@ const executorSlice = createSlice({
       state.name = action.payload.name;
       state.email = action.payload.email;
       state.phone = action.payload.phone;
+      state.photo = action.payload.photo ?? null;
       state.status = action.payload.status;
       state.latitude = action.payload.latitude;
       state.longitude = action.payload.longitude;
@@ -51,8 +54,11 @@ const executorSlice = createSlice({
       state.isWorkInShhabat = action.payload.isWorkInShhabat;
       state.adress = action.payload.adress;
     },
+    setExecutorPhoto: (state, action: PayloadAction<string | null>) => {
+      state.photo = action.payload;
+    },
   },
 });
 
-export const { setExecutor } = executorSlice.actions;
+export const { setExecutor, setExecutorPhoto } = executorSlice.actions;
 export default executorSlice.reducer;

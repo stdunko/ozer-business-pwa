@@ -8,9 +8,10 @@ type AppHeaderProps = {
   title: string;
   back?: boolean;
   right?: ReactNode;
+  avatar?: ReactNode;
 };
 
-const AppHeader = ({ title, back, right }: AppHeaderProps) => {
+const AppHeader = ({ title, back, right, avatar }: AppHeaderProps) => {
   const navigate = useNavigate();
   const { isRtl } = useRtl();
 
@@ -24,7 +25,10 @@ const AppHeader = ({ title, back, right }: AppHeaderProps) => {
           </button>
         ) : null}
       </div>
-      <h1 className="header-title">{title}</h1>
+      <h1 className="header-title">
+        {avatar}
+        <span className="header-title-text">{title}</span>
+      </h1>
       <div className="header-side end">{right}</div>
     </header>
   );

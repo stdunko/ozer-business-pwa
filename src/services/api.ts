@@ -48,7 +48,7 @@ api.interceptors.response.use(
   }
 );
 
-type ExecutorUpdateInput = Omit<ExecutorState, "status" | "createdAt" | "updatedAt" | "phone" | "id">;
+type ExecutorUpdateInput = Omit<ExecutorState, "status" | "createdAt" | "updatedAt" | "phone" | "id" | "pushSubscription">;
 
 const normalizeCategoryIds = (categories?: CategoryType[] | number[]) => {
   if (!categories?.length) {
@@ -69,6 +69,7 @@ const buildExecutorUpdatePayload = (executor: ExecutorUpdateInput) => ({
   unp: executor.unp ?? null,
   adress: executor.adress?.trim() ?? "",
   isWorkInShhabat: Boolean(executor.isWorkInShhabat),
+  ...(executor.photo ? { photo: executor.photo } : {}),
 });
 
 export const authRegister = async (phone: string) => {
@@ -128,6 +129,30 @@ export const updateExecutorInfo = async (id: number, executor: ExecutorUpdateInp
   } catch (e) {
     const axiosError = e as { response?: { data?: unknown } };
     console.error("Error update current user:", axiosError.response?.data ?? e);
+    error = e;
+  }
+  return { error, response };
+};
+
+export const updateExecutorPushSubscription = async (id: number, pushSubscription: string) => {
+  let error;
+  let response;
+  try {
+    response = await api.patch(`executor/${id}`, { pushSubscription });
+  } catch (e) {
+    console.error("Error saving push subscription:", e);
+    error = e;
+  }
+  return { error, response };
+};
+
+export const uploadBase64File = async (uploadBase64String: string) => {
+  let error;
+  let response;
+  try {
+    response = await api.post("/file/uploadFile", { uploadBase64String });
+  } catch (e) {
+    console.error("Error uploading file:", e);
     error = e;
   }
   return { error, response };

@@ -1,13 +1,18 @@
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useTranslation } from "react-i18next";
-import { FileText, Grid3x3, Home, Mail, Phone, Plus, User, X } from "lucide-react";
+import { Camera, FileText, Grid3x3, Home, Mail, Phone, Plus, User, X } from "lucide-react";
+import { doc, setDoc } from "firebase/firestore";
 import { useAppDispatch, useAppSelector } from "../store/hooks";
 import { setToken } from "../store/authSlice";
-import { emptyExecutor, setExecutor } from "../store/executorSlice";
-import { getCategories, updateExecutorInfo } from "../services/api";
+import { emptyExecutor, setExecutor, setExecutorPhoto } from "../store/executorSlice";
+import { resetLive } from "../store/liveSlice";
+import { getCategories, updateExecutorInfo, uploadBase64File } from "../services/api";
+import { db } from "../firebase";
 import { storage } from "../utils/storage";
 import { appConfig } from "../config";
+import { compressImageFile } from "../utils/image";
+import { getInitials } from "../utils/chat";
 import { useNotifier } from "../components/AppNotifier";
 import AppHeader from "../components/AppHeader";
 import AppTextInput from "../components/AppTextInput";
@@ -46,8 +51,12 @@ const ProfileScreen = () => {
   const [selectedCategories, setSelectedCategories] = useState<CategoryType[]>([]);
   const [showModal, setShowModal] = useState(false);
   const [saveLoading, setSaveLoading] = useState(false);
+  const [photo, setPhoto] = useState(executor.photo || "");
+  const [photoLoading, setPhotoLoading] = useState(false);
+  const [logoutVisible, setLogoutVisible] = useState(false);
   const [fieldErrors, setFieldErrors] = useState<Partial<Record<ProfileFieldKey, string>>>({});
   const [formError, setFormError] = useState("");
+  const fileRef = useRef<HTMLInputElement>(null);
 
   const filteredCategories = useMemo(
     () => allCategories.filter((category) => !updatedCategories.some((item) => item.id === category.id)),
@@ -57,6 +66,7 @@ const ProfileScreen = () => {
   useEffect(() => {
     setName(executor.name || "");
     setEmail(executor.email || "");
+    setPhoto(executor.photo || "");
     setUnp(executor.unp ?? null);
     setAdress(executor.adress || "");
     setRadius(executor.radius || 0);
@@ -68,6 +78,12 @@ const ProfileScreen = () => {
       setMapSyncKey((value) => value + 1);
     }
   }, [executor.id]);
+
+  useEffect(() => {
+    if (executor.photo) {
+      setPhoto(executor.photo);
+    }
+  }, [executor.photo]);
 
   useEffect(() => {
     (async () => {
@@ -143,6 +159,7 @@ const ProfileScreen = () => {
       unp,
       adress: adress.trim(),
       isWorkInShhabat: isWorkInShhabat === "yes",
+      photo: photo || executor.photo,
     });
     if (!error && response?.data) {
       dispatch(setExecutor(response.data));
@@ -155,9 +172,52 @@ const ProfileScreen = () => {
     setSaveLoading(false);
   };
 
+  const onPickPhoto = async (file: File | undefined) => {
+    if (!file?.type.startsWith("image/")) {
+      return;
+    }
+    setPhotoLoading(true);
+    try {
+      const dataUrl = await compressImageFile(file, 512, 0.72);
+      const { response, error } = await uploadBase64File(dataUrl);
+      if (error || !response?.data) {
+        showApiError(error, "errorUploadPhoto");
+        return;
+      }
+      const photoUrl = typeof response.data === "string" ? response.data : String(response.data);
+      try {
+        await setDoc(doc(db, "executorProfiles", String(executor.id)), { photo: photoUrl }, { merge: true });
+      } catch (firestoreError) {
+        console.error("Firestore photo:", firestoreError);
+      }
+      storage.set(`executorPhoto:${executor.id}`, photoUrl);
+      await updateExecutorInfo(executor.id, {
+        name: executor.name,
+        email: executor.email,
+        latitude: executor.latitude,
+        longitude: executor.longitude,
+        radius: executor.radius,
+        categories: executor.categories,
+        unp: executor.unp,
+        adress: executor.adress,
+        isWorkInShhabat: executor.isWorkInShhabat,
+        photo: photoUrl,
+      });
+      setPhoto(photoUrl);
+      dispatch(setExecutorPhoto(photoUrl));
+      showSuccess("photoUpdated");
+    } finally {
+      setPhotoLoading(false);
+      if (fileRef.current) {
+        fileRef.current.value = "";
+      }
+    }
+  };
+
   const logOut = () => {
     storage.remove("token");
     dispatch(setToken(""));
+    dispatch(resetLive());
     dispatch(setExecutor(emptyExecutor()));
   };
 
@@ -197,6 +257,35 @@ const ProfileScreen = () => {
         </div>
 
         <div className="pad">
+          <div className="profile-hero">
+            <button
+              type="button"
+              className="profile-avatar"
+              onClick={() => fileRef.current?.click()}
+              disabled={photoLoading}
+              aria-label={photo ? t("changePhoto") : t("addPhoto")}
+            >
+              {photo ? (
+                <img src={photo} alt="" />
+              ) : (
+                <span className="profile-avatar-fallback">{getInitials(name || executor.phone)}</span>
+              )}
+              <span className="profile-avatar-cam">
+                {photoLoading ? <span className="spinner" /> : <Camera size={16} />}
+              </span>
+            </button>
+            <div className="profile-hero-name">{name || executor.phone}</div>
+            <button type="button" className="profile-photo-link" onClick={() => fileRef.current?.click()}>
+              {photo ? t("changePhoto") : t("addPhoto")}
+            </button>
+            <input
+              ref={fileRef}
+              className="hidden-file"
+              type="file"
+              accept="image/*"
+              onChange={(e) => onPickPhoto(e.target.files?.[0])}
+            />
+          </div>
           <div className="section-head">
             <h2 className="section-heading">{t("yourCategories")}</h2>
             <button type="button" className="add-chip" onClick={() => setShowModal(true)}>
@@ -307,11 +396,27 @@ const ProfileScreen = () => {
             disabled={saveLoading || !isFormChanged()}
           />
           <div style={{ height: 8 }} />
-          <PrimaryButton title={t("logOut")} variant="secondary" onPress={logOut} />
+          <PrimaryButton title={t("logOut")} variant="secondary" onPress={() => setLogoutVisible(true)} className="btn-logout" />
           <div style={{ height: 8 }} />
           <PrimaryButton title={t("aboutTitle")} variant="secondary" onPress={() => navigate("/app/about")} />
         </div>
       </div>
+      {logoutVisible ? (
+        <div className="modal-backdrop center" onClick={() => setLogoutVisible(false)}>
+          <div className="modal-card" onClick={(e) => e.stopPropagation()}>
+            <h3 className="sheet-title">{t("logOutTitle")}</h3>
+            <p className="hint" style={{ marginTop: 12 }}>{t("logOutConfirm")}</p>
+            <div style={{ display: "flex", gap: 8, marginTop: 8 }}>
+              <button type="button" className="btn btn-secondary" onClick={() => setLogoutVisible(false)}>
+                {t("cancel")}
+              </button>
+              <button type="button" className="btn btn-danger" onClick={logOut}>
+                {t("logOut")}
+              </button>
+            </div>
+          </div>
+        </div>
+      ) : null}
       <CategoryModal
         isVisible={showModal}
         categories={filteredCategories}
