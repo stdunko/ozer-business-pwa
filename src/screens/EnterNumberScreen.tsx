@@ -3,6 +3,7 @@ import { useTranslation } from "react-i18next";
 import { useNavigate } from "react-router-dom";
 import { ChevronDown, Smartphone } from "lucide-react";
 import { authLogin, authRegister } from "../services/api";
+import AboutAppSheet from "../components/AboutAppSheet";
 import { useNotifier } from "../components/AppNotifier";
 import AppHeader from "../components/AppHeader";
 import CountryFlag from "../components/CountryFlag";
@@ -24,6 +25,7 @@ const EnterNumberScreen = () => {
   const [country, setCountry] = useState<Country>(DEFAULT_COUNTRY);
   const [isPickerOpen, setIsPickerOpen] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
+  const [aboutOpen, setAboutOpen] = useState(false);
 
   const handlePhoneChange = (value: string) => {
     const nextPhone = normalizePhoneInput(value);
@@ -91,8 +93,12 @@ const EnterNumberScreen = () => {
             disabled={phone.length < 8 || isLoading}
           />
         </div>
+        <button type="button" className="auth-about-btn" onClick={() => setAboutOpen(true)}>
+          {t("aboutTitle")}
+        </button>
         <p className="auth-footnote">{t("logInNumberFooterText")}</p>
       </div>
+      <AboutAppSheet isVisible={aboutOpen} onClose={() => setAboutOpen(false)} />
       <CountryPicker
         isVisible={isPickerOpen}
         selectedIso={country.iso}

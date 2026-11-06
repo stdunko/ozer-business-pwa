@@ -28,11 +28,14 @@ interface Window {
       };
       Size: new (width: number, height: number) => unknown;
       Point: new (x: number, y: number) => unknown;
+      RenderingType?: { RASTER: string; VECTOR: string };
+      importLibrary?: (name: string) => Promise<unknown>;
       event: {
         addListener: (instance: unknown, name: string, handler: () => void) => unknown;
         addListenerOnce: (instance: unknown, name: string, handler: () => void) => unknown;
         removeListener: (listener: unknown) => void;
         trigger: (instance: unknown, name: string) => void;
+        clearInstanceListeners?: (instance: unknown) => void;
       };
     };
   };

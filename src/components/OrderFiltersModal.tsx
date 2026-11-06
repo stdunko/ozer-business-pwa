@@ -101,7 +101,7 @@ const OrderFiltersModal = ({
 
   return (
     <div className="modal-backdrop" onClick={onClose}>
-      <div className="sheet" onClick={(e) => e.stopPropagation()}>
+      <div className="sheet filters-sheet" onClick={(e) => e.stopPropagation()}>
         <div className="handle" />
         <div className="sheet-header">
           <h2 className="sheet-title">{t("filtersTitle")}</h2>
@@ -200,15 +200,17 @@ const OrderFiltersModal = ({
               {t("resetFilters")}
             </button>
           ) : (
-            <div style={{ width: 88 }} />
+            <span />
           )}
           <PrimaryButton
+            className="sheet-apply"
             title={t("applyFilters")}
             onPress={() => {
               onApply(draft);
               onClose();
             }}
           />
+          <span />
         </div>
       </div>
     </div>

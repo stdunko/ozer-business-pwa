@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from "react";
+import { useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { ClipboardList, Funnel } from "lucide-react";
 import { useTranslation } from "react-i18next";
@@ -6,7 +6,6 @@ import {
   cancelOrderByExecutor,
   completeOrderByExecutor,
   confirmOrderByExecutor,
-  getCategories,
 } from "../services/api";
 import { useAppDispatch, useAppSelector } from "../store/hooks";
 import { requestLiveRefresh, setOrders } from "../store/liveSlice";
@@ -16,9 +15,8 @@ import OrderItem from "../components/OrderItem";
 import OrderFilterCarousels from "../components/OrderFilterCarousels";
 import OrderFiltersModal from "../components/OrderFiltersModal";
 import PullToRefresh from "../components/PullToRefresh";
-import type { CategoryType } from "../types/category";
 import { defaultOrderFilters, type OrderFiltersState } from "../types/order";
-import { filterOrders, hasActiveOrderFilters, mergeOrderCategories } from "../utils/orderUtils";
+import { filterOrders, getUniqueOrderCategories, hasActiveOrderFilters } from "../utils/orderUtils";
 import type { Chat } from "../types/chat";
 
 const OrderScreen = () => {
@@ -32,23 +30,10 @@ const OrderScreen = () => {
   const [visibleGeoId, setVisibleGeoId] = useState<number | null>(null);
   const [filters, setFilters] = useState<OrderFiltersState>(defaultOrderFilters);
   const [isFiltersVisible, setFiltersVisible] = useState(false);
-  const [allCategories, setAllCategories] = useState<CategoryType[]>([]);
 
-  const categories = useMemo(
-    () => mergeOrderCategories([...(executor.categories || []), ...allCategories], orders),
-    [allCategories, executor.categories, orders]
-  );
+  const categories = useMemo(() => getUniqueOrderCategories(orders), [orders]);
   const filteredOrders = useMemo(() => filterOrders(orders, filters), [orders, filters]);
   const filtersActive = hasActiveOrderFilters(filters);
-
-  useEffect(() => {
-    void (async () => {
-      const { response } = await getCategories();
-      if (response?.data) {
-        setAllCategories(response.data);
-      }
-    })();
-  }, []);
 
   const onPressConfirmOrder = async (id: number) => {
     const { error } = await confirmOrderByExecutor(id, executor.id);
