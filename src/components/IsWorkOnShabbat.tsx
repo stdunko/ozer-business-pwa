@@ -15,7 +15,10 @@ const IsWorkOnShabbat = ({ isWorkOnShabbat, setIsWorkOnShabbat }: IsWorkOnShabba
   return (
     <div className="radio-group">
       {options.map((option) => (
-        <label key={option.value} className="radio-row">
+        <label
+          key={option.value}
+          className={`radio-row ${isWorkOnShabbat === option.value ? "selected" : ""}`}
+        >
           <input
             type="radio"
             name="shabbat"

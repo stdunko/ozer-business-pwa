@@ -17,7 +17,7 @@ const TabBar = () => {
   return (
     <nav className="tabbar">
       {tabs.map((tab) => (
-        <NavLink key={tab.to} to={tab.to} className={({ isActive }) => (isActive ? "active" : "")}>
+        <NavLink end key={tab.to} to={tab.to} className={({ isActive }) => (isActive ? "active" : "")}>
           <span className="tab-icon">
             <tab.icon size={22} />
             {tab.badge ? <span className="tab-badge">{tab.badge > 99 ? "99+" : tab.badge}</span> : null}

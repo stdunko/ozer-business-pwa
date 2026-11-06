@@ -1,15 +1,21 @@
-import { Outlet, useLocation } from "react-router-dom";
+import { Outlet, matchPath, useLocation } from "react-router-dom";
 import { useAppSelector } from "../store/hooks";
 import TabBar from "../components/TabBar";
 import { useLiveSync } from "../hooks/useLiveSync";
 import { usePushNotifications } from "../hooks/usePushNotifications";
+
+const hideTabBarOn = (pathname: string) =>
+  Boolean(
+    matchPath({ path: "/app/chats/:chatId", end: true }, pathname) ||
+      matchPath({ path: "/app/about", end: true }, pathname)
+  );
 
 const AppLayout = () => {
   const location = useLocation();
   const executorId = useAppSelector((state) => state.executor.id);
   useLiveSync();
   usePushNotifications();
-  const hideTabBar = location.pathname.includes("/chats/") || location.pathname.includes("/about");
+  const hideTabBar = hideTabBarOn(location.pathname);
 
   if (!executorId) {
     return (
@@ -20,7 +26,7 @@ const AppLayout = () => {
   }
 
   return (
-    <div className={`app-layout ${hideTabBar ? "" : "has-tabbar"}`}>
+    <div className="app-layout">
       <div className="app-layout-body">
         <Outlet />
       </div>

@@ -97,10 +97,6 @@ img {
   overflow: hidden;
 }
 
-.has-tabbar .app-layout-body {
-  padding-bottom: calc(var(--tab-h) + var(--safe-bottom));
-}
-
 .screen {
   flex: 1;
   display: flex;
@@ -223,10 +219,6 @@ img {
 }
 
 .tabbar {
-  position: absolute;
-  left: 0;
-  right: 0;
-  bottom: 0;
   z-index: 30;
   height: calc(var(--tab-h) + var(--safe-bottom));
   padding-bottom: var(--safe-bottom);
@@ -916,6 +908,7 @@ html[dir="rtl"] .bubble.in {
 }
 
 .input-bar {
+  flex-shrink: 0;
   background: var(--surface);
   border-top: 1px solid var(--border);
   padding: 8px 16px calc(8px + var(--safe-bottom));
@@ -1532,22 +1525,56 @@ html[dir="rtl"] .bubble.in {
 }
 
 .profile-card {
-  padding: 16px 16px 4px;
+  padding: 16px;
   background: var(--surface);
   border-radius: var(--radius-xl);
   border: 1px solid var(--border);
   box-shadow: var(--shadow);
 }
 
+.profile-card + .profile-card {
+  margin-top: 12px;
+}
+
 .profile-card .field:last-child {
-  margin-bottom: 12px;
+  margin-bottom: 0;
 }
 
 .profile-actions {
   margin-top: 20px;
   display: flex;
   flex-direction: column;
+  gap: 12px;
+  padding-bottom: 8px;
+}
+
+.profile-actions .btn-primary {
+  min-height: 48px;
+  border-radius: 14px;
+}
+
+.profile-links {
+  display: flex;
+  align-items: center;
+  justify-content: center;
   gap: 8px;
+}
+
+.profile-text-btn {
+  flex: 1;
+  min-height: 44px;
+  border-radius: 12px;
+  font-size: 15px;
+  font-weight: 600;
+  color: var(--text-secondary);
+}
+
+.profile-text-btn:active {
+  background: var(--surface);
+}
+
+.profile-text-btn.danger {
+  color: var(--error);
 }
 
 .btn-logout {
@@ -1666,8 +1693,15 @@ html[dir="rtl"] .bubble.in {
 }
 
 .profile-map {
-  height: 320px;
-  border-radius: 0;
+  height: 196px;
+  border-radius: var(--radius-md);
+  margin: 10px 0 4px;
+  border: 1px solid var(--border);
+}
+
+.profile-map .leaflet-control-attribution {
+  font-size: 9px;
+  background: rgba(255, 255, 255, 0.82);
 }
 
 .map-error {
@@ -1678,24 +1712,25 @@ html[dir="rtl"] .bubble.in {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  margin-bottom: 8px;
+  gap: 8px;
+  margin-bottom: 4px;
 }
 
 .section-heading {
-  font-size: 16px;
-  font-weight: 600;
+  font-size: 15px;
+  font-weight: 650;
 }
 
 .add-chip {
   display: inline-flex;
   align-items: center;
   gap: 4px;
-  padding: 4px 8px;
+  padding: 6px 10px;
   border-radius: 999px;
   background: var(--primary-light);
   color: var(--primary);
   font-weight: 600;
-  font-size: 14px;
+  font-size: 13px;
 }
 
 .empty-cats {
@@ -1735,29 +1770,70 @@ html[dir="rtl"] .bubble.in {
 }
 
 .slider-block {
-  margin: 16px 0;
+  margin: 8px 0 0;
+}
+
+.radius-value {
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--primary);
+  font-variant-numeric: tabular-nums;
 }
 
 .radius-slider {
   width: 100%;
+  height: 4px;
   accent-color: var(--primary);
 }
 
 .radio-group {
   display: flex;
-  flex-direction: column;
-  gap: 8px;
-  margin-bottom: 16px;
+  gap: 4px;
+  margin: 8px 0 16px;
+  padding: 4px;
+  background: var(--input-bg);
+  border-radius: 12px;
 }
 
 .radio-row {
+  position: relative;
+  flex: 1;
   display: flex;
   align-items: center;
-  gap: 8px;
+  justify-content: center;
+  min-height: 40px;
+  border-radius: 10px;
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--text-secondary);
+  text-transform: capitalize;
+  cursor: pointer;
 }
 
 .radio-row input {
-  accent-color: var(--primary);
+  position: absolute;
+  opacity: 0;
+  pointer-events: none;
+}
+
+.radio-row.selected {
+  background: var(--surface);
+  color: var(--text);
+  box-shadow: var(--shadow);
+}
+
+.chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.profile-card .chips {
+  margin-top: 8px;
+}
+
+.profile-card .empty-cats {
+  margin: 8px 0 0;
 }
 
 .order-actions {

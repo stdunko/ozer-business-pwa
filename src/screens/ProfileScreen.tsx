@@ -20,7 +20,6 @@ import CategoryModal from "../components/CategoryModal";
 import IsWorkOnShabbat from "../components/IsWorkOnShabbat";
 import MapView from "../components/MapView";
 import PrimaryButton from "../components/PrimaryButton";
-import SelectLanguage from "../components/SelectLanguage";
 import type { CategoryType } from "../types/category";
 import { validateProfileForm, type ProfileFieldKey } from "../utils/profileValidation";
 
@@ -239,57 +238,78 @@ const ProfileScreen = () => {
   return (
     <div className="screen">
       <AppHeader title={t("profile")} />
-      <div className="scroll">
-        {fieldErrors.location ? <p className="error-text pad">{fieldErrors.location}</p> : null}
-        <div className={`map-wrap profile-map ${fieldErrors.location ? "map-error" : ""}`}>
-          <MapView
-            latitude={latitude}
-            longitude={longitude}
-            circleRadius={radius}
-            onRegionChange={(region) => {
-              setLatitude(region.latitude);
-              setLongitude(region.longitude);
-              clearFieldError("location");
-            }}
-            syncKey={mapSyncKey}
+      <div className="scroll pad">
+        <div className="profile-hero">
+          <button
+            type="button"
+            className="profile-avatar"
+            onClick={() => fileRef.current?.click()}
+            disabled={photoLoading}
+            aria-label={photo ? t("changePhoto") : t("addPhoto")}
+          >
+            {photo ? (
+              <img src={photo} alt="" />
+            ) : (
+              <span className="profile-avatar-fallback">{getInitials(name || executor.phone)}</span>
+            )}
+            <span className="profile-avatar-cam">
+              {photoLoading ? <span className="spinner" /> : <Camera size={16} />}
+            </span>
+          </button>
+          <div className="profile-hero-name">{name || executor.phone}</div>
+          <button type="button" className="profile-photo-link" onClick={() => fileRef.current?.click()}>
+            {photo ? t("changePhoto") : t("addPhoto")}
+          </button>
+          <input
+            ref={fileRef}
+            className="hidden-file"
+            type="file"
+            accept="image/*"
+            onChange={(e) => onPickPhoto(e.target.files?.[0])}
           />
-          <img className="fake-marker" src="/maps-and-flags.png" alt="" />
         </div>
 
-        <div className="pad">
-          <div className="profile-hero">
-            <button
-              type="button"
-              className="profile-avatar"
-              onClick={() => fileRef.current?.click()}
-              disabled={photoLoading}
-              aria-label={photo ? t("changePhoto") : t("addPhoto")}
-            >
-              {photo ? (
-                <img src={photo} alt="" />
-              ) : (
-                <span className="profile-avatar-fallback">{getInitials(name || executor.phone)}</span>
-              )}
-              <span className="profile-avatar-cam">
-                {photoLoading ? <span className="spinner" /> : <Camera size={16} />}
-              </span>
-            </button>
-            <div className="profile-hero-name">{name || executor.phone}</div>
-            <button type="button" className="profile-photo-link" onClick={() => fileRef.current?.click()}>
-              {photo ? t("changePhoto") : t("addPhoto")}
-            </button>
-            <input
-              ref={fileRef}
-              className="hidden-file"
-              type="file"
-              accept="image/*"
-              onChange={(e) => onPickPhoto(e.target.files?.[0])}
-            />
+        <div className="profile-card">
+          <div className="section-head">
+            <h2 className="section-heading">{t("radius")}</h2>
+            <span className="radius-value">{Math.round(radius)} m</span>
           </div>
+          {fieldErrors.location ? <p className="error-text">{fieldErrors.location}</p> : null}
+          <div className={`map-wrap profile-map ${fieldErrors.location ? "map-error" : ""}`}>
+            <MapView
+              latitude={latitude}
+              longitude={longitude}
+              circleRadius={radius}
+              onRegionChange={(region) => {
+                setLatitude(region.latitude);
+                setLongitude(region.longitude);
+                clearFieldError("location");
+              }}
+              syncKey={mapSyncKey}
+            />
+            <img className="fake-marker" src="/maps-and-flags.png" alt="" />
+          </div>
+          <div className="slider-block">
+            <input
+              className="radius-slider"
+              type="range"
+              min={0}
+              max={20000}
+              value={radius}
+              onChange={(e) => {
+                setRadius(Number(e.target.value));
+                clearFieldError("radius");
+              }}
+            />
+            {fieldErrors.radius ? <p className="error-text">{fieldErrors.radius}</p> : null}
+          </div>
+        </div>
+
+        <div className="profile-card">
           <div className="section-head">
             <h2 className="section-heading">{t("yourCategories")}</h2>
             <button type="button" className="add-chip" onClick={() => setShowModal(true)}>
-              <Plus size={18} />
+              <Plus size={16} />
               {t("add")}
             </button>
           </div>
@@ -321,29 +341,11 @@ const ProfileScreen = () => {
               ))}
             </div>
           )}
+        </div>
 
-          <div className="slider-block">
-            <p>{t("radius")}</p>
-            <input
-              className="radius-slider"
-              type="range"
-              min={0}
-              max={20000}
-              value={radius}
-              onChange={(e) => {
-                setRadius(Number(e.target.value));
-                clearFieldError("radius");
-              }}
-            />
-            <p className="muted">{Math.round(radius)} m</p>
-            {fieldErrors.radius ? <p className="error-text">{fieldErrors.radius}</p> : null}
-          </div>
-
-          <p className="section-heading" style={{ marginBottom: 8 }}>
-            {t("IsWorkOnShabbat")}
-          </p>
+        <div className="profile-card">
+          <h2 className="section-heading">{t("IsWorkOnShabbat")}</h2>
           <IsWorkOnShabbat isWorkOnShabbat={isWorkInShhabat} setIsWorkOnShabbat={setIsWorkOnShabbat} />
-
           <AppTextInput
             icon={User}
             value={name}
@@ -356,7 +358,6 @@ const ProfileScreen = () => {
             error={Boolean(fieldErrors.name)}
           />
           {fieldErrors.name ? <p className="error-text">{fieldErrors.name}</p> : null}
-
           <AppTextInput
             icon={Mail}
             value={email}
@@ -371,7 +372,6 @@ const ProfileScreen = () => {
             error={Boolean(fieldErrors.email)}
           />
           {fieldErrors.email ? <p className="error-text">{fieldErrors.email}</p> : null}
-
           <AppTextInput icon={Phone} value={executor.phone} readOnly placeholder={t("phone")} />
           <AppTextInput
             icon={FileText}
@@ -385,20 +385,24 @@ const ProfileScreen = () => {
             placeholder={t("unp")}
           />
           <AppTextInput icon={Home} value={adress} onChange={(e) => setAdress(e.target.value)} placeholder={t("address")} />
+        </div>
 
-          <SelectLanguage />
-          {formError ? <p className="error-text" style={{ textAlign: "center" }}>{formError}</p> : null}
-          <div style={{ height: 12 }} />
+        {formError ? <p className="error-text" style={{ textAlign: "center" }}>{formError}</p> : null}
+        <div className="profile-actions">
           <PrimaryButton
             title={t("confirm")}
             onPress={onPressSave}
             loading={saveLoading}
             disabled={saveLoading || !isFormChanged()}
           />
-          <div style={{ height: 8 }} />
-          <PrimaryButton title={t("logOut")} variant="secondary" onPress={() => setLogoutVisible(true)} className="btn-logout" />
-          <div style={{ height: 8 }} />
-          <PrimaryButton title={t("aboutTitle")} variant="secondary" onPress={() => navigate("/app/about")} />
+          <div className="profile-links">
+            <button type="button" className="profile-text-btn" onClick={() => navigate("/app/about")}>
+              {t("aboutTitle")}
+            </button>
+            <button type="button" className="profile-text-btn danger" onClick={() => setLogoutVisible(true)}>
+              {t("logOut")}
+            </button>
+          </div>
         </div>
       </div>
       {logoutVisible ? (
