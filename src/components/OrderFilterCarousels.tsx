@@ -26,7 +26,7 @@ const OrderFilterCarousels = ({ filters, categories, onChange }: OrderFilterCaro
     <div className="order-quick-filters">
       <div className="quick-filter-block">
         <div className="quick-filter-label">{t("filterByStatus")}</div>
-        <div className="filter-wrap" role="list" aria-label={t("filterByStatus")}>
+        <div className="filter-carousel" role="list" aria-label={t("filterByStatus")}>
           {STATUSES.map((status) => (
             <button
               key={status}

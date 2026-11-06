@@ -1,3 +1,5 @@
+import { createPortal } from "react-dom";
+import { X } from "lucide-react";
 import { useTranslation } from "react-i18next";
 import MapView from "./MapView";
 
@@ -15,15 +17,16 @@ const ExecutorGeo = ({ latitude, longitude, isVisible, onClose }: ExecutorGeoPro
     return null;
   }
 
-  return (
-    <div className="modal-backdrop center" onClick={onClose}>
-      <div className="modal-card" onClick={(e) => e.stopPropagation()}>
-        <div style={{ display: "flex", justifyContent: "flex-end", marginBottom: 8 }}>
-          <button type="button" onClick={onClose} style={{ color: "var(--primary)", fontWeight: 600 }}>
-            {t("closeGeo")}
+  return createPortal(
+    <div className="geo-overlay" onClick={onClose}>
+      <div className="geo-popup" onClick={(event) => event.stopPropagation()}>
+        <div className="geo-popup-head">
+          <h2 className="geo-popup-title">{t("openGeo")}</h2>
+          <button type="button" className="icon-btn" onClick={onClose} aria-label={t("close")}>
+            <X size={22} />
           </button>
         </div>
-        <div className="map-wrap" style={{ height: 300, borderRadius: 12 }}>
+        <div className="geo-popup-map">
           <MapView
             latitude={latitude || 0}
             longitude={longitude || 0}
@@ -32,7 +35,8 @@ const ExecutorGeo = ({ latitude, longitude, isVisible, onClose }: ExecutorGeoPro
           />
         </div>
       </div>
-    </div>
+    </div>,
+    document.body
   );
 };
 
