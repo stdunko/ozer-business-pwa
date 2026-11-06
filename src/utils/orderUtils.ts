@@ -16,6 +16,20 @@ export const getOrderCreatedAt = (order: Order): Date | null => {
   return Number.isNaN(date.getTime()) ? null : date;
 };
 
+export const formatOrderDate = (order: Order, locale: string): string | null => {
+  const date = getOrderCreatedAt(order);
+  if (!date) {
+    return null;
+  }
+  return date.toLocaleString(locale, {
+    day: "2-digit",
+    month: "short",
+    year: "numeric",
+    hour: "2-digit",
+    minute: "2-digit",
+  });
+};
+
 export const getUniqueOrderCategories = (orders: Order[]) => {
   const map = new Map<number, string>();
   orders.forEach((order) => {

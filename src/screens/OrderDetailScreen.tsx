@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
-import { ClipboardList } from "lucide-react";
+import { ClipboardList, MessageCircle } from "lucide-react";
 import { useTranslation } from "react-i18next";
 import {
   cancelOrderByExecutor,
@@ -9,13 +9,22 @@ import {
 } from "../services/api";
 import { useNotifier } from "../components/AppNotifier";
 import AppHeader from "../components/AppHeader";
-import OrderItem from "../components/OrderItem";
+import CategoryIcon from "../components/CategoryIcon";
+import MapView from "../components/MapView";
+import NameModal from "../components/NameModal";
+import PersonAvatar from "../components/PersonAvatar";
 import { useAppDispatch, useAppSelector } from "../store/hooks";
 import { requestLiveRefresh, setOrders } from "../store/liveSlice";
 import type { Chat } from "../types/chat";
+import { isConfirmedOrder, isNewOrder } from "../types/order";
+import { formatOrderDate } from "../utils/orderUtils";
+import { openOrCreateOrderChat } from "../utils/orderChat";
+
+const hasCoords = (lat?: number, lng?: number) =>
+  lat != null && lng != null && Number.isFinite(lat) && Number.isFinite(lng) && !(lat === 0 && lng === 0);
 
 const OrderDetailScreen = () => {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
   const navigate = useNavigate();
   const { orderId } = useParams();
   const dispatch = useAppDispatch();
@@ -24,37 +33,105 @@ const OrderDetailScreen = () => {
   const orders = useAppSelector((state) => state.live.orders);
   const id = Number(orderId);
   const order = orders.find((item) => item.id === id);
-  const [visibleGeoId, setVisibleGeoId] = useState<number | null>(null);
+  const [nameModalVisible, setNameModalVisible] = useState(false);
+  const [chatLoading, setChatLoading] = useState(false);
+  const [actionLoading, setActionLoading] = useState<"confirm" | "cancel" | "complete" | null>(null);
 
-  const onPressConfirmOrder = async (nextId: number) => {
-    const { error } = await confirmOrderByExecutor(nextId, executor.id);
+  const onPressConfirmOrder = async () => {
+    if (!order) {
+      return;
+    }
+    setActionLoading("confirm");
+    const { error } = await confirmOrderByExecutor(order.id, executor.id);
+    setActionLoading(null);
     if (error) {
       showApiError(error, "errorGeneric");
       return;
     }
-    dispatch(setOrders(orders.map((item) => (item.id === nextId ? { ...item, status: 2 } : item))));
+    dispatch(setOrders(orders.map((item) => (item.id === order.id ? { ...item, status: 2 } : item))));
     dispatch(requestLiveRefresh());
   };
 
-  const onPressCancelOrder = async (nextId: number) => {
-    const { error } = await cancelOrderByExecutor(nextId);
+  const onPressCancelOrder = async () => {
+    if (!order) {
+      return;
+    }
+    setActionLoading("cancel");
+    const { error } = await cancelOrderByExecutor(order.id);
+    setActionLoading(null);
     if (error) {
       showApiError(error, "errorGeneric");
       return;
     }
-    dispatch(setOrders(orders.filter((item) => item.id !== nextId)));
+    dispatch(setOrders(orders.filter((item) => item.id !== order.id)));
     navigate("/app/orders", { replace: true });
   };
 
-  const onPressCompleteOrder = async (nextId: number) => {
-    const { error } = await completeOrderByExecutor(nextId);
+  const onPressCompleteOrder = async () => {
+    if (!order) {
+      return;
+    }
+    setActionLoading("complete");
+    const { error } = await completeOrderByExecutor(order.id);
+    setActionLoading(null);
     if (error) {
       showApiError(error, "errorGeneric");
       return;
     }
-    dispatch(setOrders(orders.map((item) => (item.id === nextId ? { ...item, status: 3 } : item))));
+    dispatch(setOrders(orders.map((item) => (item.id === order.id ? { ...item, status: 3 } : item))));
     dispatch(requestLiveRefresh());
   };
+
+  const handlePressChat = async () => {
+    if (!order?.user?.id || chatLoading) {
+      return;
+    }
+    setChatLoading(true);
+    const chatData = await openOrCreateOrderChat({
+      myId: executor.id,
+      otherId: order.user.id,
+      orderId: order.id,
+      orderCategory: order.category?.name,
+      participants: [
+        { executor_id: executor.id, name: executor.name, photo: executor.photo },
+        { user_id: order.user.id, name: order.user.name || "No user name" },
+      ],
+    });
+    setChatLoading(false);
+    const next = chatData as Chat;
+    navigate(`/app/chats/${next.id}`, { state: { chat: next } });
+  };
+
+  const nameFun = () => {
+    if (!executor.name || !executor.email) {
+      setNameModalVisible(true);
+      return;
+    }
+    void onPressConfirmOrder();
+  };
+
+  const statusClass = order
+    ? isNewOrder(order.status)
+      ? "badge-new"
+      : isConfirmedOrder(order.status)
+        ? "badge-work"
+        : order.status === "CANCELED" || order.status === 0
+          ? "badge-cancel"
+          : "badge-done"
+    : "";
+
+  const statusLabel = order
+    ? isNewOrder(order.status)
+      ? t("orderStatus1")
+      : isConfirmedOrder(order.status)
+        ? t("orderStatus2")
+        : order.status === "COMPLETED" || order.status === 3
+          ? t("orderStatus3")
+          : t("orderStatus0")
+    : "";
+
+  const createdAtLabel = order ? formatOrderDate(order, i18n.language) : null;
+  const showMap = order ? hasCoords(order.latitude, order.longitude) : false;
 
   return (
     <div className="screen">
@@ -67,21 +144,87 @@ const OrderDetailScreen = () => {
           <p className="empty">{t("orderNotFound")}</p>
         </div>
       ) : (
-        <div className="scroll pad">
-          <OrderItem
-            item={order}
-            isGeoVisible={visibleGeoId === order.id}
-            setVisibleGeoId={setVisibleGeoId}
-            onConfirmOrder={onPressConfirmOrder}
-            onCancelOrder={onPressCancelOrder}
-            onCompleteOrder={onPressCompleteOrder}
-            onMessagePress={(chat) => {
-              const next = chat as Chat;
-              navigate(`/app/chats/${next.id}`, { state: { chat: next } });
-            }}
-          />
+        <div className="scroll">
+          {showMap ? (
+            <div className="order-detail-map">
+              <MapView
+                latitude={order.latitude as number}
+                longitude={order.longitude as number}
+                markers={[{ latitude: order.latitude as number, longitude: order.longitude as number }]}
+                interactive
+              />
+            </div>
+          ) : null}
+          <div className="order-detail-body">
+            <div className="order-detail-hero">
+              <div className="order-detail-cat-icon">
+                <CategoryIcon categoryName={order.category?.name} size={26} />
+              </div>
+              <div className="order-detail-hero-text">
+                <div className="order-detail-cat">{order.category?.name}</div>
+                <span className={`badge ${statusClass}`}>{statusLabel}</span>
+              </div>
+            </div>
+            <div className="order-detail-price">{order.price} ₪</div>
+            {createdAtLabel ? (
+              <div className="order-detail-meta">
+                {t("orderCreatedAt")}: {createdAtLabel}
+              </div>
+            ) : null}
+            <div className="order-detail-block">
+              <div className="order-detail-label">{t("description")}</div>
+              <p className="order-detail-text">{order.description}</p>
+            </div>
+            {order.user ? (
+              <div className="order-detail-block order-detail-person">
+                <PersonAvatar
+                  className="order-detail-avatar"
+                  name={order.user.name}
+                  userId={order.user.id}
+                />
+                <div>
+                  <div className="order-detail-label">{t("customer")}</div>
+                  <div className="order-detail-name">{order.user.name}</div>
+                  {order.user.phone ? <div className="order-detail-meta">{order.user.phone}</div> : null}
+                </div>
+              </div>
+            ) : null}
+            <div className="order-detail-actions">
+              {order.user?.id ? (
+                <button type="button" className="btn btn-secondary" onClick={() => void handlePressChat()} disabled={chatLoading}>
+                  {chatLoading ? <span className="spinner" /> : <><MessageCircle size={20} /> {t("goToChat")}</>}
+                </button>
+              ) : null}
+              {isNewOrder(order.status) ? (
+                <button type="button" className="btn btn-primary" onClick={nameFun} disabled={actionLoading === "confirm"}>
+                  {actionLoading === "confirm" ? <span className="spinner" /> : t("getStarted")}
+                </button>
+              ) : null}
+              {isConfirmedOrder(order.status) ? (
+                <>
+                  <button
+                    type="button"
+                    className="btn btn-primary"
+                    onClick={() => void onPressCompleteOrder()}
+                    disabled={actionLoading === "complete"}
+                  >
+                    {actionLoading === "complete" ? <span className="spinner" /> : t("orderCompleted")}
+                  </button>
+                  <button
+                    type="button"
+                    className="btn btn-secondary"
+                    onClick={() => void onPressCancelOrder()}
+                    disabled={actionLoading === "cancel"}
+                  >
+                    {actionLoading === "cancel" ? <span className="spinner" /> : t("cancelOrder")}
+                  </button>
+                </>
+              ) : null}
+            </div>
+          </div>
         </div>
       )}
+      <NameModal isVisible={nameModalVisible} onClose={() => setNameModalVisible(false)} />
     </div>
   );
 };
