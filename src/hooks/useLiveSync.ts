@@ -55,7 +55,7 @@ export const useLiveSync = () => {
       const nextOrders = response.data as Order[];
       if (silent) {
         reportNewIncomingOrders(ordersRef.current, nextOrders, (order) => {
-          const title = order.category?.name || "Ozer";
+          const title = order.category?.name || "OzerilBusiness";
           const message = t("newOrder");
           showInfo(message);
           notifyIfHidden(title, message, "/app/orders");

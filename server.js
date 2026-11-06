@@ -24,5 +24,5 @@ app.get("*", (_req, res) => {
 });
 
 app.listen(PORT, () => {
-  console.log(`Ozer Business PWA listening on ${PORT}`);
+  console.log(`OzerilBusiness PWA listening on ${PORT}`);
 });

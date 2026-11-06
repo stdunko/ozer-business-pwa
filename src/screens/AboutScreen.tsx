@@ -22,9 +22,9 @@ const AboutScreen = () => {
             <span className="muted">{t("contactPrivacy")}</span>
             <span>privacy@ozer.co.il</span>
           </a>
-          <a className="about-row" href="https://ozer.co.il" target="_blank" rel="noreferrer">
+          <a className="about-row" href="https://ozeril.co.il" target="_blank" rel="noreferrer">
             <span className="muted">{t("contactWeb")}</span>
-            <span>ozer.co.il</span>
+            <span>ozeril.co.il</span>
           </a>
         </div>
       </div>

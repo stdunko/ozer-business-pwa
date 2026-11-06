@@ -18,9 +18,9 @@ export default defineConfig({
       filename: "sw.js",
       includeAssets: ["favicon.png", "logo.png", "icon.png", "maps-and-flags.png"],
       manifest: {
-        name: "Ozer Business",
-        short_name: "Ozer Biz",
-        description: "Приложение для исполнителей Ozer — заказы, профиль и чаты с клиентами",
+        name: "OzerilBusiness",
+        short_name: "Ozeril Biz",
+        description: "Приложение OzerilBusiness для исполнителей — заказы, профиль и чаты",
         theme_color: "#2D2D2D",
         background_color: "#ffffff",
         display: "standalone",
