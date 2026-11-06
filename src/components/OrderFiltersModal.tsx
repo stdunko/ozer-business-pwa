@@ -1,19 +1,20 @@
 import { useEffect, useMemo, useState, type ReactNode } from "react";
-import { X } from "lucide-react";
+import { Search, X } from "lucide-react";
 import { useTranslation } from "react-i18next";
 import PrimaryButton from "./PrimaryButton";
+import AppTextInput from "./AppTextInput";
+import CategoryIcon from "./CategoryIcon";
 import {
   defaultOrderFilters,
-  type Order,
   type OrderFilterStatus,
   type OrderFiltersState,
   type PriceSort,
 } from "../types/order";
-import { getUniqueOrderCategories, hasActiveOrderFilters } from "../utils/orderUtils";
+import { hasActiveOrderFilters, type OrderCategoryOption } from "../utils/orderUtils";
 
 type OrderFiltersModalProps = {
   isVisible: boolean;
-  orders: Order[];
+  categories: OrderCategoryOption[];
   filters: OrderFiltersState;
   onClose: () => void;
   onApply: (filters: OrderFiltersState) => void;
@@ -52,20 +53,29 @@ const FilterSection = ({ title, children }: { title: string; children: ReactNode
 
 const OrderFiltersModal = ({
   isVisible,
-  orders,
+  categories,
   filters,
   onClose,
   onApply,
 }: OrderFiltersModalProps) => {
   const { t } = useTranslation();
   const [draft, setDraft] = useState<OrderFiltersState>(filters);
-  const categories = useMemo(() => getUniqueOrderCategories(orders), [orders]);
+  const [categoryQuery, setCategoryQuery] = useState("");
 
   useEffect(() => {
     if (isVisible) {
       setDraft(filters);
+      setCategoryQuery("");
     }
   }, [isVisible, filters]);
+
+  const visibleCategories = useMemo(() => {
+    const query = categoryQuery.trim().toLowerCase();
+    if (!query) {
+      return categories;
+    }
+    return categories.filter((item) => item.name.toLowerCase().includes(query));
+  }, [categories, categoryQuery]);
 
   if (!isVisible) {
     return null;
@@ -112,25 +122,43 @@ const OrderFiltersModal = ({
               ))}
             </div>
           </FilterSection>
-          {categories.length > 0 ? (
-            <FilterSection title={t("filterByCategory")}>
-              <div className="chips">
-                <FilterChip
-                  label={t("filterAll")}
-                  isActive={draft.categoryId === "ALL"}
-                  onPress={() => setDraftFilter("categoryId", "ALL")}
+          <FilterSection title={t("filterByCategory")}>
+            {categories.length > 6 ? (
+              <div className="filter-category-search">
+                <AppTextInput
+                  icon={Search}
+                  placeholder={t("searchCategories")}
+                  value={categoryQuery}
+                  onChange={(e) => setCategoryQuery(e.target.value)}
                 />
-                {categories.map((category) => (
-                  <FilterChip
-                    key={category.id}
-                    label={category.name}
-                    isActive={draft.categoryId === category.id}
-                    onPress={() => setDraftFilter("categoryId", category.id)}
-                  />
-                ))}
               </div>
-            </FilterSection>
-          ) : null}
+            ) : null}
+            <div className="picker-list filter-category-list">
+              <button
+                type="button"
+                className={`picker-row ${draft.categoryId === "ALL" ? "selected" : ""}`}
+                onClick={() => setDraftFilter("categoryId", "ALL")}
+              >
+                <span className="picker-row-name">{t("filterAll")}</span>
+              </button>
+              {visibleCategories.map((category) => (
+                <button
+                  key={category.id}
+                  type="button"
+                  className={`picker-row ${draft.categoryId === category.id ? "selected" : ""}`}
+                  onClick={() => setDraftFilter("categoryId", category.id)}
+                >
+                  <span className="picker-row-icon">
+                    <CategoryIcon iconUrl={category.icon} categoryName={category.name} size={22} />
+                  </span>
+                  <span className="picker-row-name">{category.name}</span>
+                </button>
+              ))}
+            </div>
+            {categories.length > 0 && visibleCategories.length === 0 ? (
+              <p className="empty">{t("categoriesNotFound")}</p>
+            ) : null}
+          </FilterSection>
           <FilterSection title={t("filterByPrice")}>
             <div className="chips">
               {PRICE_SORT_OPTIONS.map((sort) => (

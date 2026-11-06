@@ -30,7 +30,9 @@ export const formatOrderDate = (order: Order, locale: string): string | null => 
   });
 };
 
-export const getUniqueOrderCategories = (orders: Order[]) => {
+export type OrderCategoryOption = { id: number; name: string; icon?: string | null };
+
+export const getUniqueOrderCategories = (orders: Order[]): OrderCategoryOption[] => {
   const map = new Map<number, string>();
   orders.forEach((order) => {
     if (order.category?.id != null && order.category?.name) {
@@ -40,6 +42,25 @@ export const getUniqueOrderCategories = (orders: Order[]) => {
   return Array.from(map.entries())
     .map(([id, name]) => ({ id, name }))
     .sort((a, b) => a.name.localeCompare(b.name));
+};
+
+export const mergeOrderCategories = (
+  extra: Array<{ id?: number; name?: string; icon?: string | null }> = [],
+  orders: Order[] = []
+): OrderCategoryOption[] => {
+  const map = new Map<number, OrderCategoryOption>();
+  extra.forEach((item) => {
+    if (item?.id == null || !item.name) {
+      return;
+    }
+    map.set(item.id, { id: item.id, name: item.name, icon: item.icon });
+  });
+  getUniqueOrderCategories(orders).forEach((item) => {
+    if (!map.has(item.id)) {
+      map.set(item.id, item);
+    }
+  });
+  return Array.from(map.values()).sort((a, b) => a.name.localeCompare(b.name));
 };
 
 export const filterOrders = (orders: Order[], filters: OrderFiltersState): Order[] => {
