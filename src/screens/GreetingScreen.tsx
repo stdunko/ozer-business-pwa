@@ -9,18 +9,23 @@ const GreetingScreen = () => {
   const navigate = useNavigate();
 
   return (
-    <div className="screen screen-surface">
+    <div className="screen auth-screen">
       <AppHeader
         title="OzerilBusiness"
         avatar={<img src="/logo.png" alt="" className="header-brand-logo" />}
       />
-      <div className="pad-lg greeting-body">
-        <div className="center-col">
-          <img src="/logo.png" alt="OzerilBusiness" className="logo" />
-          <p className="tagline">{t("logInFooterText")}</p>
+      <div className="auth-body">
+        <div className="auth-hero">
+          <div className="auth-hero-icon">
+            <img src="/logo.png" alt="" className="auth-hero-logo" />
+          </div>
+          <h2 className="auth-title">OzerilBusiness</h2>
+          <p className="auth-subtitle">{t("logInFooterText")}</p>
         </div>
-        <InstallBanner />
-        <PrimaryButton title={t("logInButtonText")} onPress={() => navigate("/login/phone")} />
+        <div className="auth-card">
+          <InstallBanner />
+          <PrimaryButton title={t("logInButtonText")} onPress={() => navigate("/login/phone")} />
+        </div>
       </div>
     </div>
   );

@@ -1,7 +1,13 @@
 import { useEffect, useRef, useState } from "react";
 import { ExternalLink } from "lucide-react";
 import { useTranslation } from "react-i18next";
-import { googleMapsSearchUrl, loadGoogleMaps } from "../utils/googleMaps";
+import {
+  accentPinIcon,
+  attachGoogleMap,
+  detachGoogleMap,
+  googleMapsSearchUrl,
+  loadGoogleMaps,
+} from "../utils/googleMaps";
 
 type MapViewProps = {
   latitude: number;
@@ -11,12 +17,15 @@ type MapViewProps = {
   circleRadius?: number;
   interactive?: boolean;
   syncKey?: string | number;
+  centerPin?: boolean;
 };
 
 type GoogleMap = {
   setCenter: (latLng: { lat: number; lng: number }) => void;
   getCenter: () => { lat: () => number; lng: () => number } | undefined;
   setOptions: (opts: Record<string, unknown>) => void;
+  setZoom?: (zoom: number) => void;
+  getDiv?: () => HTMLElement;
 };
 
 type GoogleMarker = {
@@ -29,6 +38,30 @@ type GoogleCircle = {
   setRadius: (radius: number) => void;
 };
 
+const pinColor = () =>
+  getComputedStyle(document.documentElement).getPropertyValue("--primary").trim() || "#2d2d2d";
+
+const waitForSize = (el: HTMLElement, isCancelled: () => boolean) =>
+  new Promise<void>((resolve) => {
+    if (el.clientWidth > 0 && el.clientHeight > 0) {
+      resolve();
+      return;
+    }
+    const observer = new ResizeObserver(() => {
+      if (el.clientWidth > 0 && el.clientHeight > 0) {
+        observer.disconnect();
+        resolve();
+      }
+    });
+    observer.observe(el);
+    window.setTimeout(() => {
+      observer.disconnect();
+      if (!isCancelled()) {
+        resolve();
+      }
+    }, 1500);
+  });
+
 const MapView = ({
   latitude,
   longitude,
@@ -37,6 +70,7 @@ const MapView = ({
   circleRadius,
   interactive = true,
   syncKey,
+  centerPin = false,
 }: MapViewProps) => {
   const { t } = useTranslation();
   const elRef = useRef<HTMLDivElement>(null);
@@ -58,6 +92,10 @@ const MapView = ({
   useEffect(() => {
     let cancelled = false;
     let idleListener: unknown;
+    let resizeObserver: ResizeObserver | null = null;
+    let visibilityObserver: IntersectionObserver | null = null;
+    const mapsApi = () => window.google?.maps;
+    setReady(false);
 
     void (async () => {
       window.gm_authFailure = () => {
@@ -73,30 +111,37 @@ const MapView = ({
         }
         return;
       }
-      if (cancelled || !elRef.current || !window.google?.maps) {
+      const el = elRef.current;
+      if (cancelled || !el || !window.google?.maps) {
+        return;
+      }
+      await waitForSize(el, () => cancelled);
+      if (cancelled || !el.isConnected || !window.google?.maps) {
         return;
       }
 
       const maps = window.google.maps;
       const { latitude: lat, longitude: lng } = coordsRef.current;
-      const map =
-        mapRef.current ??
-        new maps.Map(elRef.current, {
-          center: { lat, lng },
-          zoom: 15,
-          disableDefaultUI: true,
-          zoomControl: interactive,
-          gestureHandling: interactive ? "greedy" : "none",
-          draggable: interactive,
-          clickableIcons: false,
-          keyboardShortcuts: false,
-        });
-      mapRef.current = map;
-      map.setOptions({
+      const map = attachGoogleMap(el, {
+        center: { lat, lng },
+        zoom: 15,
+        disableDefaultUI: true,
         zoomControl: interactive,
         gestureHandling: interactive ? "greedy" : "none",
         draggable: interactive,
+        clickableIcons: false,
+        keyboardShortcuts: false,
       });
+      mapRef.current = map;
+
+      const refresh = () => {
+        maps.event.trigger(map, "resize");
+        const current = coordsRef.current;
+        skipIdleRef.current = true;
+        map.setCenter({ lat: current.latitude, lng: current.longitude });
+      };
+      maps.event.addListenerOnce(map, "idle", refresh);
+      requestAnimationFrame(refresh);
 
       idleListener = maps.event.addListener(map, "idle", () => {
         if (skipIdleRef.current) {
@@ -111,14 +156,37 @@ const MapView = ({
         circleRef.current?.setCenter(next);
         onRegionChangeRef.current?.({ latitude: next.lat, longitude: next.lng });
       });
-      setReady(true);
+
+      resizeObserver = new ResizeObserver(() => {
+        maps.event.trigger(map, "resize");
+      });
+      resizeObserver.observe(el);
+      visibilityObserver = new IntersectionObserver((entries) => {
+        if (entries.some((entry) => entry.isIntersecting && entry.intersectionRatio > 0)) {
+          refresh();
+        }
+      });
+      visibilityObserver.observe(el);
+      if (!cancelled) {
+        setReady(true);
+      }
     })();
 
     return () => {
       cancelled = true;
+      resizeObserver?.disconnect();
+      visibilityObserver?.disconnect();
       if (idleListener) {
-        window.google?.maps.event.removeListener(idleListener);
+        mapsApi()?.event.removeListener(idleListener);
       }
+      markersRef.current.forEach((marker) => marker.setMap(null));
+      markersRef.current = [];
+      circleRef.current?.setMap(null);
+      circleRef.current = null;
+      if (mapRef.current) {
+        detachGoogleMap(mapRef.current);
+      }
+      mapRef.current = null;
     };
   }, [interactive]);
 
@@ -138,11 +206,13 @@ const MapView = ({
       return;
     }
     markersRef.current.forEach((marker) => marker.setMap(null));
+    const icon = accentPinIcon(maps, pinColor());
     markersRef.current = (markers || []).map(
       (marker) =>
         new maps.Marker({
           map,
           position: { lat: marker.latitude, lng: marker.longitude },
+          icon,
         })
     );
   }, [markerKey, ready]);
@@ -158,8 +228,7 @@ const MapView = ({
       circleRef.current = null;
       return;
     }
-    const color =
-      getComputedStyle(document.documentElement).getPropertyValue("--primary").trim() || "#2d2d2d";
+    const color = pinColor();
     if (!circleRef.current) {
       circleRef.current = new maps.Circle({
         map,
@@ -203,6 +272,7 @@ const MapView = ({
   return (
     <div className="google-map-wrap">
       <div ref={elRef} className="google-map" />
+      {centerPin ? <span className="map-pin" aria-hidden /> : null}
       {showOpen ? (
         <a
           className="open-in-maps"

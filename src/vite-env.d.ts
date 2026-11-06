@@ -15,6 +15,8 @@ interface Window {
         setCenter: (latLng: { lat: number; lng: number }) => void;
         getCenter: () => { lat: () => number; lng: () => number } | undefined;
         setOptions: (opts: Record<string, unknown>) => void;
+        setZoom?: (zoom: number) => void;
+        getDiv?: () => HTMLElement;
       };
       Marker: new (opts?: Record<string, unknown>) => {
         setMap: (map: unknown) => void;
@@ -24,9 +26,13 @@ interface Window {
         setCenter: (latLng: { lat: number; lng: number }) => void;
         setRadius: (radius: number) => void;
       };
+      Size: new (width: number, height: number) => unknown;
+      Point: new (x: number, y: number) => unknown;
       event: {
         addListener: (instance: unknown, name: string, handler: () => void) => unknown;
+        addListenerOnce: (instance: unknown, name: string, handler: () => void) => unknown;
         removeListener: (listener: unknown) => void;
+        trigger: (instance: unknown, name: string) => void;
       };
     };
   };

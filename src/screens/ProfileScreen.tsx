@@ -280,6 +280,7 @@ const ProfileScreen = () => {
               latitude={latitude}
               longitude={longitude}
               circleRadius={radius}
+              centerPin
               onRegionChange={(region) => {
                 setLatitude(region.latitude);
                 setLongitude(region.longitude);
@@ -287,7 +288,6 @@ const ProfileScreen = () => {
               }}
               syncKey={mapSyncKey}
             />
-            <img className="fake-marker" src="/maps-and-flags.png" alt="" />
           </div>
           <div className="slider-block">
             <input
