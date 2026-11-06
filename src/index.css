@@ -37,17 +37,18 @@ html,
 body,
 #root {
   position: fixed;
-  inset: 0;
-  top: var(--app-offset-top, 0px);
+  top: 0;
+  left: 0;
+  right: 0;
   width: 100%;
-  height: var(--app-h, 100dvh);
+  height: var(--app-h, 100svh);
   overflow: hidden;
   overscroll-behavior: none;
 }
 
 body {
   font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
-  background: #dce3e8;
+  background: var(--background);
   color: var(--text);
   -webkit-font-smoothing: antialiased;
 }
@@ -84,13 +85,21 @@ img {
   min-height: 0;
   display: flex;
   justify-content: center;
-  background: #dce3e8;
+  background: var(--background);
+}
+
+@media (min-width: 481px) {
+  body,
+  .app-frame {
+    background: #dce3e8;
+  }
 }
 
 .app-shell {
   width: 100%;
   max-width: 480px;
   height: 100%;
+  min-height: 100%;
   overflow: hidden;
   background: var(--background);
   position: relative;
@@ -384,6 +393,7 @@ img {
 
 .pad-lg {
   padding: 24px;
+  padding-bottom: calc(24px + var(--safe-bottom));
 }
 
 .grow {
@@ -1466,7 +1476,7 @@ html[dir="rtl"] .bubble.in {
   flex: 1;
   min-height: 0;
   overflow-y: auto;
-  padding: 8px 24px 32px;
+  padding: 8px 24px calc(32px + var(--safe-bottom));
   display: flex;
   flex-direction: column;
 }
