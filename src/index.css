@@ -1238,29 +1238,35 @@ html[dir="rtl"] .bubble.in {
   bottom: calc(80px + var(--safe-bottom));
   width: calc(100% - 32px);
   max-width: 448px;
-  z-index: 60;
+  z-index: 90;
   display: flex;
   align-items: center;
-  gap: 8px;
+  gap: 10px;
   padding: 14px 16px;
-  border-radius: var(--radius-lg);
-  border: 1px solid var(--border);
+  border-radius: 14px;
+  border: none;
+  color: #fff;
   font-size: 14px;
-  font-weight: 500;
+  font-weight: 600;
   line-height: 20px;
+  box-shadow: 0 10px 28px rgba(15, 23, 42, 0.22);
   animation: fadein 0.22s ease;
 }
 
+.toast svg {
+  flex-shrink: 0;
+}
+
 .toast.error {
-  background: #fee2e2;
+  background: var(--error);
 }
 
 .toast.success {
-  background: #d1fae5;
+  background: var(--primary);
 }
 
 .toast.info {
-  background: var(--primary-light);
+  background: #1a2332;
 }
 
 @keyframes fadein {
