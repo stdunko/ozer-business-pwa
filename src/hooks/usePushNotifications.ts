@@ -1,7 +1,9 @@
 import { useEffect } from "react";
+import { useTranslation } from "react-i18next";
 import { updateExecutorPushSubscription } from "../services/api";
 import { appConfig } from "../config";
 import { useAppSelector } from "../store/hooks";
+import { notifyServiceWorkerLanguage, withPushLanguage } from "../utils/pushI18n";
 
 const urlBase64ToUint8Array = (base64: string) => {
   const padding = "=".repeat((4 - (base64.length % 4)) % 4);
@@ -32,8 +34,10 @@ export const notifyIfHidden = (title: string, body: string, url?: string) => {
 };
 
 export const usePushNotifications = () => {
+  const { i18n } = useTranslation();
   const executorId = useAppSelector((state) => state.executor.id);
   const token = useAppSelector((state) => state.authorization.token);
+  const language = i18n.language;
 
   useEffect(() => {
     if (!token || !executorId || !("Notification" in window) || !("serviceWorker" in navigator)) {
@@ -64,9 +68,10 @@ export const usePushNotifications = () => {
           applicationServerKey: urlBase64ToUint8Array(appConfig.vapidPublicKey),
         });
       }
-      await updateExecutorPushSubscription(executorId, JSON.stringify(subscription));
+      notifyServiceWorkerLanguage(language);
+      await updateExecutorPushSubscription(executorId, withPushLanguage(subscription, language));
     };
 
     void register().catch((error) => console.error("Web Push:", error));
-  }, [executorId, token]);
+  }, [executorId, language, token]);
 };

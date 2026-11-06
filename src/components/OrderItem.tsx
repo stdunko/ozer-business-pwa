@@ -32,6 +32,7 @@ const OrderItem = ({
   const { t } = useTranslation();
   const executor = useAppSelector((state) => state.executor);
   const [nameModalVisible, setNameModalVisible] = useState(false);
+  const [confirmCancel, setConfirmCancel] = useState(false);
 
   const statusClass = isNewOrder(item.status)
     ? "badge-new"
@@ -123,7 +124,7 @@ const OrderItem = ({
           <button type="button" className="action-btn" onClick={() => onCompleteOrder(item.id)}>
             {t("orderCompleted")}
           </button>
-          <button type="button" className="action-btn-outline" onClick={() => onCancelOrder(item.id)}>
+          <button type="button" className="action-btn-outline" onClick={() => setConfirmCancel(true)}>
             {t("cancelOrder")}
           </button>
         </div>
@@ -135,6 +136,29 @@ const OrderItem = ({
         onClose={() => setVisibleGeoId(null)}
       />
       <NameModal isVisible={nameModalVisible} onClose={() => setNameModalVisible(false)} />
+      {confirmCancel ? (
+        <div className="modal-backdrop center" onClick={() => setConfirmCancel(false)}>
+          <div className="modal-card" onClick={(e) => e.stopPropagation()}>
+            <h3 className="sheet-title">{t("cancelOrderTitle")}</h3>
+            <p className="hint" style={{ marginTop: 12 }}>{t("cancelOrderConfirm")}</p>
+            <div style={{ display: "flex", gap: 8, marginTop: 8 }}>
+              <button type="button" className="btn btn-secondary" onClick={() => setConfirmCancel(false)}>
+                {t("cancel")}
+              </button>
+              <button
+                type="button"
+                className="btn btn-danger"
+                onClick={() => {
+                  setConfirmCancel(false);
+                  onCancelOrder(item.id);
+                }}
+              >
+                {t("cancelOrder")}
+              </button>
+            </div>
+          </div>
+        </div>
+      ) : null}
     </div>
   );
 };

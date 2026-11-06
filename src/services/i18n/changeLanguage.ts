@@ -1,5 +1,6 @@
 import type { LanguageCode } from "../../utils/languages";
 import { isRtlLanguage } from "../../utils/languages";
+import { notifyServiceWorkerLanguage } from "../../utils/pushI18n";
 import { storage } from "../../utils/storage";
 import i18n from "./index";
 
@@ -13,6 +14,7 @@ export const changeAppLanguage = async (language: LanguageCode) => {
   storage.set("language", language);
   applyDocumentDirection(language);
   await i18n.changeLanguage(language);
+  notifyServiceWorkerLanguage(language);
 };
 
 export const bootstrapAppLanguage = async (): Promise<boolean> => {
@@ -20,5 +22,6 @@ export const bootstrapAppLanguage = async (): Promise<boolean> => {
   const language = (savedLanguage as LanguageCode) || "ru";
   applyDocumentDirection(language);
   await i18n.changeLanguage(language);
+  notifyServiceWorkerLanguage(language);
   return true;
 };

@@ -34,6 +34,7 @@ const OrderDetailScreen = () => {
   const id = Number(orderId);
   const order = orders.find((item) => item.id === id);
   const [nameModalVisible, setNameModalVisible] = useState(false);
+  const [confirmCancel, setConfirmCancel] = useState(false);
   const [chatLoading, setChatLoading] = useState(false);
   const [actionLoading, setActionLoading] = useState<"confirm" | "cancel" | "complete" | null>(null);
 
@@ -212,8 +213,8 @@ const OrderDetailScreen = () => {
                   </button>
                   <button
                     type="button"
-                    className="btn btn-secondary"
-                    onClick={() => void onPressCancelOrder()}
+                    className="btn btn-danger-outline"
+                    onClick={() => setConfirmCancel(true)}
                     disabled={actionLoading === "cancel"}
                   >
                     {actionLoading === "cancel" ? <span className="spinner" /> : t("cancelOrder")}
@@ -225,6 +226,29 @@ const OrderDetailScreen = () => {
         </div>
       )}
       <NameModal isVisible={nameModalVisible} onClose={() => setNameModalVisible(false)} />
+      {confirmCancel ? (
+        <div className="modal-backdrop center" onClick={() => setConfirmCancel(false)}>
+          <div className="modal-card" onClick={(e) => e.stopPropagation()}>
+            <h3 className="sheet-title">{t("cancelOrderTitle")}</h3>
+            <p className="hint" style={{ marginTop: 12 }}>{t("cancelOrderConfirm")}</p>
+            <div style={{ display: "flex", gap: 8, marginTop: 8 }}>
+              <button type="button" className="btn btn-secondary" onClick={() => setConfirmCancel(false)}>
+                {t("cancel")}
+              </button>
+              <button
+                type="button"
+                className="btn btn-danger"
+                onClick={() => {
+                  setConfirmCancel(false);
+                  void onPressCancelOrder();
+                }}
+              >
+                {t("cancelOrder")}
+              </button>
+            </div>
+          </div>
+        </div>
+      ) : null}
     </div>
   );
 };
