@@ -28,10 +28,21 @@
   padding: 0;
 }
 
+html {
+  -webkit-text-size-adjust: 100%;
+  text-size-adjust: 100%;
+}
+
 html,
 body,
 #root {
-  height: 100%;
+  position: fixed;
+  inset: 0;
+  top: var(--app-offset-top, 0px);
+  width: 100%;
+  height: var(--app-h, 100dvh);
+  overflow: hidden;
+  overscroll-behavior: none;
 }
 
 body {
@@ -43,8 +54,15 @@ body {
 
 button,
 input,
-textarea {
+textarea,
+select {
   font-family: inherit;
+}
+
+input:not([type="checkbox"]):not([type="radio"]):not([type="file"]),
+textarea,
+select {
+  font-size: 16px !important;
 }
 
 button {
@@ -62,7 +80,8 @@ img {
 }
 
 .app-frame {
-  min-height: 100%;
+  height: 100%;
+  min-height: 0;
   display: flex;
   justify-content: center;
   background: #dce3e8;
@@ -71,8 +90,7 @@ img {
 .app-shell {
   width: 100%;
   max-width: 480px;
-  height: 100dvh;
-  min-height: 100dvh;
+  height: 100%;
   overflow: hidden;
   background: var(--background);
   position: relative;
@@ -84,6 +102,7 @@ img {
 .app-layout {
   flex: 1;
   min-height: 0;
+  height: 100%;
   display: flex;
   flex-direction: column;
   position: relative;
@@ -218,6 +237,11 @@ img {
   line-height: 1;
 }
 
+.header .filter-badge {
+  background: #fff;
+  border-color: var(--primary);
+}
+
 .tabbar {
   z-index: 30;
   height: calc(var(--tab-h) + var(--safe-bottom));
@@ -227,6 +251,8 @@ img {
   border-top: 1px solid var(--border);
   display: flex;
   flex-shrink: 0;
+  position: sticky;
+  bottom: 0;
   box-shadow: 0 -8px 24px rgba(15, 23, 42, 0.08);
 }
 
@@ -639,6 +665,13 @@ img {
   gap: 8px;
 }
 
+.order-no {
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--primary);
+  letter-spacing: 0.02em;
+}
+
 .order-cat {
   font-size: 13px;
   font-weight: 600;
@@ -822,6 +855,26 @@ img {
   white-space: nowrap;
 }
 
+.chat-order {
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--primary);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  margin-bottom: 2px;
+}
+
+.chat-order-bar {
+  flex-shrink: 0;
+  padding: 8px 16px;
+  background: var(--primary-light);
+  color: var(--primary);
+  font-size: 13px;
+  font-weight: 600;
+  border-bottom: 1px solid var(--border);
+}
+
 .chat-time {
   font-size: 12px;
   color: var(--text-muted);
@@ -973,7 +1026,7 @@ html[dir="rtl"] .bubble.in {
   border: 1px solid var(--border);
   border-radius: var(--radius-md);
   padding: 10px 12px;
-  font-size: 15px;
+  font-size: 16px;
   resize: none;
   outline: none;
   background: var(--surface);

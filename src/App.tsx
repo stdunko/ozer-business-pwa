@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { useViewportLock } from "./hooks/useViewportLock";
 import { Navigate, Route, Routes, useNavigate } from "react-router-dom";
 import { useAppDispatch, useAppSelector } from "./store/hooks";
 import { setToken } from "./store/authSlice";
@@ -41,6 +42,7 @@ const SwNavigation = () => {
 };
 
 const App = () => {
+  useViewportLock();
   const dispatch = useAppDispatch();
   const token = useAppSelector((state) => state.authorization.token);
   const { showApiError } = useNotifier();

@@ -12,4 +12,8 @@ export type Chat = {
   participants?: ChatParticipant[];
   lastMessageTimestamp?: unknown;
   lastMessageText?: string;
+  lastMessageUserId?: number | string;
+  orderId?: number;
+  orderCategory?: string;
+  unread?: Record<string, number>;
 };

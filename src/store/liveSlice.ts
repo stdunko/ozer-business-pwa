@@ -41,6 +41,13 @@ const liveSlice = createSlice({
     setChatUnread: (state, action: PayloadAction<{ chatId: string; unread: number }>) => {
       state.unreadByChatId[action.payload.chatId] = action.payload.unread;
     },
+    mergeChatUnread: (state, action: PayloadAction<Record<string, number>>) => {
+      Object.entries(action.payload).forEach(([chatId, unread]) => {
+        if (unread > (state.unreadByChatId[chatId] || 0)) {
+          state.unreadByChatId[chatId] = unread;
+        }
+      });
+    },
     requestLiveRefresh: (state) => {
       state.refreshNonce += 1;
     },
@@ -54,6 +61,7 @@ export const {
   setOrdersLoading,
   setChatsLoading,
   setChatUnread,
+  mergeChatUnread,
   requestLiveRefresh,
   resetLive,
 } = liveSlice.actions;

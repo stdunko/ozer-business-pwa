@@ -15,10 +15,32 @@ export type Order = {
   description: string;
   latitude?: number;
   longitude?: number;
+  createdAt?: string;
+  created_at?: string;
   executorId?: number | null;
   userId?: number;
   user?: OrderUser;
   category: Pick<CategoryType, "id" | "name">;
+};
+
+export type PriceSort = "default" | "asc" | "desc";
+
+export type OrderFilterStatus = "NEW" | "CONFIRMED" | "COMPLETED" | "CANCELED";
+
+export type OrderFiltersState = {
+  status: OrderFilterStatus | "ALL";
+  categoryId: number | "ALL";
+  priceMin: string;
+  priceMax: string;
+  priceSort: PriceSort;
+};
+
+export const defaultOrderFilters: OrderFiltersState = {
+  status: "ALL",
+  categoryId: "ALL",
+  priceMin: "",
+  priceMax: "",
+  priceSort: "default",
 };
 
 export const isNewOrder = (status: OrderStatus) => status === "NEW" || status === 1;

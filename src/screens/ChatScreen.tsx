@@ -11,6 +11,7 @@ import {
   orderBy,
   query,
   Timestamp,
+  increment,
   updateDoc,
   where,
   writeBatch,
@@ -51,8 +52,10 @@ const ChatScreen = () => {
   const { t } = useTranslation();
   const { chatId } = useParams();
   const location = useLocation();
-  const chat = (location.state as { chat?: Chat } | null)?.chat;
   const executor = useAppSelector((state) => state.executor);
+  const chats = useAppSelector((state) => state.live.chats);
+  const chat =
+    (location.state as { chat?: Chat } | null)?.chat || chats.find((item) => item.id === chatId);
   const dispatch = useAppDispatch();
   const [messages, setMessages] = useState<ChatMessage[]>([]);
   const [text, setText] = useState("");
@@ -74,15 +77,15 @@ const ChatScreen = () => {
     const messagesRef = collection(db, "chats", chatId, "messages");
     const unreadQuery = query(messagesRef, where(`isRead.${executor.id}`, "==", false));
     const snapshot = await getDocs(unreadQuery);
-    if (snapshot.empty) return;
-    const batch = writeBatch(db);
-    snapshot.docs.forEach((docSnap) => {
-      batch.update(docSnap.ref, { [`isRead.${executor.id}`]: true });
-    });
-    await batch.commit();
-    if (chatId) {
-      dispatch(setChatUnread({ chatId, unread: 0 }));
+    if (!snapshot.empty) {
+      const batch = writeBatch(db);
+      snapshot.docs.forEach((docSnap) => {
+        batch.update(docSnap.ref, { [`isRead.${executor.id}`]: true });
+      });
+      await batch.commit();
     }
+    await updateDoc(doc(db, "chats", chatId), { [`unread.${String(executor.id)}`]: 0 });
+    dispatch(setChatUnread({ chatId, unread: 0 }));
   }, [chatId, dispatch, executor.id]);
 
   useLayoutEffect(() => {
@@ -163,6 +166,9 @@ const ChatScreen = () => {
       await updateDoc(doc(db, "chats", chatId), {
         lastMessageTimestamp: Timestamp.fromDate(createdAt),
         lastMessageText: payloadText || (imageToSend ? t("image") : ""),
+        lastMessageUserId: executor.id,
+        [`unread.${String(executor.id)}`]: 0,
+        ...(recipientId != null ? { [`unread.${String(recipientId)}`]: increment(1) } : {}),
       });
     } finally {
       setSendingIds((prev) => prev.filter((id) => id !== tempId));
@@ -192,6 +198,13 @@ const ChatScreen = () => {
           />
         }
       />
+      {chat?.orderId || chat?.orderCategory ? (
+        <div className="chat-order-bar">
+          {chat.orderId ? t("orderNumber", { n: chat.orderId }) : null}
+          {chat.orderId && chat.orderCategory ? " · " : null}
+          {chat.orderCategory}
+        </div>
+      ) : null}
       {chronological.length === 0 ? (
         <div className="center-col">
           <div className="category-icon" style={{ width: 72, height: 72, borderRadius: 36, marginBottom: 16 }}>
