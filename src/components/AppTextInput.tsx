@@ -32,7 +32,11 @@ const AppTextInput = ({
 
   return (
     <div className="field">
-      {Icon ? <Icon className="field-icon" size={20} /> : null}
+      {Icon ? (
+        <span className="field-icon">
+          <Icon size={20} />
+        </span>
+      ) : null}
       {multiline ? (
         <textarea className={`textarea ${extra}`} style={dirStyle} {...rest} />
       ) : (

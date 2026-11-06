@@ -22,6 +22,7 @@ import { setChatUnread } from "../store/liveSlice";
 import { compressImageFile } from "../utils/image";
 import type { Chat } from "../types/chat";
 import AppHeader from "../components/AppHeader";
+import ChatOrderBar from "../components/ChatOrderBar";
 import PersonAvatar from "../components/PersonAvatar";
 
 type ChatMessage = {
@@ -198,13 +199,7 @@ const ChatScreen = () => {
           />
         }
       />
-      {chat?.orderId || chat?.orderCategory ? (
-        <div className="chat-order-bar">
-          {chat.orderId ? t("orderNumber", { n: chat.orderId }) : null}
-          {chat.orderId && chat.orderCategory ? " · " : null}
-          {chat.orderCategory}
-        </div>
-      ) : null}
+      <ChatOrderBar chat={chat} myId={executor.id} />
       {chronological.length === 0 ? (
         <div className="center-col">
           <div className="category-icon" style={{ width: 72, height: 72, borderRadius: 36, marginBottom: 16 }}>

@@ -41,6 +41,8 @@ export default {
   executor: "Исполнитель",
   customer: "Заказчик",
   openGeo: "Открыть геопозицию",
+  openOrder: "К заказу",
+  orderNotFound: "Заказ не найден",
   getStarted: "Приступить",
   orderCompleted: "Заказ исполнен",
   cancelOrder: "Отказаться от заказа",

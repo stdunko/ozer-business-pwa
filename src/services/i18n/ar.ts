@@ -41,6 +41,8 @@ export default {
   executor: "المنفذ",
   customer: "العميل",
   openGeo: "فتح الموقع الجغرافي",
+  openOrder: "عرض الطلب",
+  orderNotFound: "لم يتم العثور على الطلب",
   getStarted: "ابدأ",
   orderCompleted: "اكتمل الطلب",
   cancelOrder: "إلغاء الطلب",

@@ -101,6 +101,7 @@ const OrderScreen = () => {
                 item={item}
                 isGeoVisible={visibleGeoId === item.id}
                 setVisibleGeoId={setVisibleGeoId}
+                onOpen={() => navigate(`/app/orders/${item.id}`)}
                 onConfirmOrder={onPressConfirmOrder}
                 onCancelOrder={onPressCancelOrder}
                 onCompleteOrder={onPressCompleteOrder}

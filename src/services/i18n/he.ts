@@ -41,6 +41,8 @@ export default {
   executor: "מבצע",
   customer: "לקוח",
   openGeo: "מיקום גיאוגרפי פתוח",
+  openOrder: "להזמנה",
+  orderNotFound: "ההזמנה לא נמצאה",
   getStarted: "להתחיל",
   orderCompleted: "ההזמנה הושלמה",
   cancelOrder: "ביטול הזמנה",

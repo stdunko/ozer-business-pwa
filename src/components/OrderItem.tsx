@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { MapPin, MessageCircle } from "lucide-react";
+import { ChevronRight, MapPin, MessageCircle } from "lucide-react";
 import { useTranslation } from "react-i18next";
 import { useAppSelector } from "../store/hooks";
 import type { Order } from "../types/order";
@@ -16,6 +16,7 @@ type OrderItemProps = {
   onCancelOrder: (id: number) => void;
   onCompleteOrder: (id: number) => void;
   onMessagePress?: (chat: unknown) => void;
+  onOpen?: () => void;
 };
 
 const OrderItem = ({
@@ -26,6 +27,7 @@ const OrderItem = ({
   onCancelOrder,
   onCompleteOrder,
   onMessagePress,
+  onOpen,
 }: OrderItemProps) => {
   const { t } = useTranslation();
   const executor = useAppSelector((state) => state.executor);
@@ -75,10 +77,20 @@ const OrderItem = ({
   return (
     <div className="order-card">
       <div className="order-top">
-        <div>
-          <div className="order-no">{t("orderNumber", { n: item.id })}</div>
-          <div className="order-cat">{item.category?.name}</div>
-        </div>
+        {onOpen ? (
+          <button type="button" className="order-open" onClick={onOpen} aria-label={t("openOrder")}>
+            <span>
+              <div className="order-no">{t("orderNumber", { n: item.id })}</div>
+              <div className="order-cat">{item.category?.name}</div>
+            </span>
+            <ChevronRight size={18} className="order-open-chevron" />
+          </button>
+        ) : (
+          <div>
+            <div className="order-no">{t("orderNumber", { n: item.id })}</div>
+            <div className="order-cat">{item.category?.name}</div>
+          </div>
+        )}
         <span className={`badge ${statusClass}`}>{statusLabel}</span>
       </div>
       <p className="order-desc">{item.description}</p>

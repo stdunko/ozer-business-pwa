@@ -16,6 +16,7 @@ import EnterNumberScreen from "./screens/EnterNumberScreen";
 import EnterOtpScreen from "./screens/EnterOtpScreen";
 import ProfileScreen from "./screens/ProfileScreen";
 import OrderScreen from "./screens/OrderScreen";
+import OrderDetailScreen from "./screens/OrderDetailScreen";
 import ChatListScreen from "./screens/ChatListScreen";
 import ChatScreen from "./screens/ChatScreen";
 import AboutScreen from "./screens/AboutScreen";
@@ -125,6 +126,7 @@ const App = () => {
             <Route path="/app" element={<AppLayout />}>
               <Route path="profile" element={<ProfileScreen />} />
               <Route path="orders" element={<OrderScreen />} />
+              <Route path="orders/:orderId" element={<OrderDetailScreen />} />
               <Route path="chats" element={<ChatListScreen />} />
               <Route path="chats/:chatId" element={<ChatScreen />} />
               <Route path="about" element={<AboutScreen />} />

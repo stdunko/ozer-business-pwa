@@ -41,6 +41,8 @@ export default {
   executor: "Executor",
   customer: "Customer",
   openGeo: "Open geolocation",
+  openOrder: "View order",
+  orderNotFound: "Order not found",
   getStarted: "Get started",
   orderCompleted: "Order completed",
   cancelOrder: "Cancel an order",

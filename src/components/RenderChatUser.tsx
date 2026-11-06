@@ -7,6 +7,7 @@ import type { Chat } from "../types/chat";
 import { formatChatTime } from "../utils/chat";
 import PersonAvatar from "./PersonAvatar";
 import { useAppSelector } from "../store/hooks";
+import { chatOrderMeta, resolveChatOrder } from "../utils/chatOrder";
 
 const RenderChatUser = ({
   item,
@@ -17,10 +18,13 @@ const RenderChatUser = ({
 }) => {
   const { t, i18n } = useTranslation();
   const unread = useAppSelector((state) => state.live.unreadByChatId[item.id] || 0);
+  const orders = useAppSelector((state) => state.live.orders);
+  const executorId = useAppSelector((state) => state.executor.id);
   const [lastMessage, setLastMessage] = useState<string | null>(item.lastMessageText || null);
   const anotherUser = item.participants?.find((member) => member.user_id);
   const name = anotherUser?.name || t("customer");
   const timeLabel = formatChatTime(item, i18n.language);
+  const orderMeta = chatOrderMeta(item, resolveChatOrder(item, orders, executorId));
 
   useEffect(() => {
     setLastMessage(item.lastMessageText || null);
@@ -58,11 +62,11 @@ const RenderChatUser = ({
           <div className="chat-name">{name}</div>
           {timeLabel ? <div className="chat-time">{timeLabel}</div> : null}
         </div>
-        {item.orderId || item.orderCategory ? (
+        {orderMeta.id || orderMeta.category ? (
           <div className="chat-order">
-            {item.orderId ? t("orderNumber", { n: item.orderId }) : null}
-            {item.orderId && item.orderCategory ? " · " : null}
-            {item.orderCategory}
+            {orderMeta.id ? t("orderNumber", { n: orderMeta.id }) : null}
+            {orderMeta.id && orderMeta.category ? " · " : null}
+            {orderMeta.category}
           </div>
         ) : null}
         <div className={`chat-preview ${unread > 0 ? "unread" : ""}`}>{lastMessage || t("noMessages")}</div>
