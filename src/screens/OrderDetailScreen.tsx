@@ -17,6 +17,7 @@ import { useAppDispatch, useAppSelector } from "../store/hooks";
 import { requestLiveRefresh, setOrders } from "../store/liveSlice";
 import type { Chat } from "../types/chat";
 import { isConfirmedOrder, isNewOrder } from "../types/order";
+import { useCategoryLabel } from "../utils/categoryI18n";
 import { formatOrderDate } from "../utils/orderUtils";
 import { openOrCreateOrderChat } from "../utils/orderChat";
 
@@ -25,6 +26,7 @@ const hasCoords = (lat?: number, lng?: number) =>
 
 const OrderDetailScreen = () => {
   const { t, i18n } = useTranslation();
+  const cat = useCategoryLabel();
   const navigate = useNavigate();
   const { orderId } = useParams();
   const dispatch = useAppDispatch();
@@ -165,7 +167,7 @@ const OrderDetailScreen = () => {
                   </span>
                   <span>
                     <div className="order-no">{t("orderNumber", { n: order.id })}</div>
-                    <div className="order-cat">{order.category?.name}</div>
+                    <div className="order-cat">{cat(order.category)}</div>
                   </span>
                 </div>
                 <span className={`badge ${statusClass}`}>{statusLabel}</span>

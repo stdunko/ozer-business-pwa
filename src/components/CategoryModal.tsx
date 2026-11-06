@@ -3,6 +3,7 @@ import { createPortal } from "react-dom";
 import { Check, Search, X } from "lucide-react";
 import { useTranslation } from "react-i18next";
 import type { CategoryType } from "../types/category";
+import { useCategoryLabel } from "../utils/categoryI18n";
 import AppTextInput from "./AppTextInput";
 import CategoryIcon from "./CategoryIcon";
 import PrimaryButton from "./PrimaryButton";
@@ -25,6 +26,7 @@ const CategoryModal = ({
   onClose,
 }: CategoryModalProps) => {
   const { t } = useTranslation();
+  const cat = useCategoryLabel();
   const [search, setSearch] = useState("");
   const selectedCount = selectedCategories.length;
 
@@ -39,8 +41,11 @@ const CategoryModal = ({
     if (!query) {
       return categories;
     }
-    return categories.filter((item) => item.name.toLowerCase().includes(query));
-  }, [categories, search]);
+    return categories.filter((item) => {
+      const label = cat(item).toLowerCase();
+      return label.includes(query) || item.name.toLowerCase().includes(query);
+    });
+  }, [cat, categories, search]);
 
   if (!isVisible) {
     return null;
@@ -84,7 +89,7 @@ const CategoryModal = ({
                     <div className="category-icon">
                       <CategoryIcon iconUrl={item.icon || item.iconName} categoryName={item.name} />
                     </div>
-                    <div className="category-name">{item.name}</div>
+                    <div className="category-name">{cat(item)}</div>
                     {isSelected ? (
                       <span className="check-badge">
                         <Check size={14} color="#fff" />

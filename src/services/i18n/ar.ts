@@ -34,7 +34,7 @@ export default {
   yes: "نعم",
   no: "لا",
   IsWorkOnShabbat: "نحن نعمل يوم السبت",
-  orderStatus1: "تبحث عن فنان",
+  orderStatus1: "جديد",
   orderStatus2: "في العمل",
   orderStatus3: "اكتمل",
   orderStatus0: "ألغيت",

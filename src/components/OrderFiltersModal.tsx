@@ -10,6 +10,7 @@ import {
   type OrderFiltersState,
   type PriceSort,
 } from "../types/order";
+import { useCategoryLabel } from "../utils/categoryI18n";
 import { type OrderCategoryOption } from "../utils/orderUtils";
 
 type OrderFiltersModalProps = {
@@ -59,6 +60,7 @@ const OrderFiltersModal = ({
   onApply,
 }: OrderFiltersModalProps) => {
   const { t } = useTranslation();
+  const cat = useCategoryLabel();
   const [draft, setDraft] = useState<OrderFiltersState>(filters);
   const [categoryQuery, setCategoryQuery] = useState("");
 
@@ -74,8 +76,11 @@ const OrderFiltersModal = ({
     if (!query) {
       return categories;
     }
-    return categories.filter((item) => item.name.toLowerCase().includes(query));
-  }, [categories, categoryQuery]);
+    return categories.filter((item) => {
+      const label = cat(item).toLowerCase();
+      return label.includes(query) || item.name.toLowerCase().includes(query);
+    });
+  }, [cat, categories, categoryQuery]);
 
   if (!isVisible) {
     return null;
@@ -151,7 +156,7 @@ const OrderFiltersModal = ({
                   <span className="picker-row-icon">
                     <CategoryIcon iconUrl={category.icon} categoryName={category.name} size={22} />
                   </span>
-                  <span className="picker-row-name">{category.name}</span>
+                  <span className="picker-row-name">{cat(category)}</span>
                 </button>
               ))}
             </div>

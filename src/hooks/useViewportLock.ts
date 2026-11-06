@@ -1,15 +1,36 @@
 import { useEffect } from "react";
 
 const KEYBOARD_GAP = 80;
+const FIELD_PAD = 16;
 
 const isStandalone = () =>
   window.matchMedia("(display-mode: standalone)").matches ||
   Boolean((window.navigator as Navigator & { standalone?: boolean }).standalone);
 
+const isTextField = (el: EventTarget | null): el is HTMLElement => {
+  if (!(el instanceof HTMLElement)) {
+    return false;
+  }
+  if (el instanceof HTMLInputElement) {
+    if (el.readOnly || el.disabled) {
+      return false;
+    }
+    return !["button", "checkbox", "radio", "file", "submit", "reset", "range", "color", "hidden", "image"].includes(
+      el.type
+    );
+  }
+  if (el instanceof HTMLTextAreaElement) {
+    return !el.readOnly && !el.disabled;
+  }
+  return el.isContentEditable;
+};
+
 const lockScroll = () => {
-  window.scrollTo(0, 0);
-  document.documentElement.scrollTop = 0;
-  document.body.scrollTop = 0;
+  if (window.scrollY || document.documentElement.scrollTop || document.body.scrollTop) {
+    window.scrollTo(0, 0);
+    document.documentElement.scrollTop = 0;
+    document.body.scrollTop = 0;
+  }
 };
 
 const frameHeight = (inner: number, visualHeight: number, visualOffset: number) => {
@@ -20,51 +41,156 @@ const frameHeight = (inner: number, visualHeight: number, visualOffset: number) 
   return Math.max(...candidates);
 };
 
-const applyViewport = () => {
-  const root = document.documentElement;
-  const visual = window.visualViewport;
-  const inner = window.innerHeight;
-  const visualHeight = visual?.height ?? inner;
-  const visualOffset = visual?.offsetTop ?? 0;
-  const keyboardOpen = Boolean(visual && (inner - visualHeight > KEYBOARD_GAP || visualOffset > 10));
+const scrollParent = (el: HTMLElement) => {
+  let node: HTMLElement | null = el.parentElement;
+  while (node && node !== document.body) {
+    const style = window.getComputedStyle(node);
+    const overflowY = style.overflowY;
+    if ((overflowY === "auto" || overflowY === "scroll" || overflowY === "overlay") && node.scrollHeight > node.clientHeight + 4) {
+      return node;
+    }
+    node = node.parentElement;
+  }
+  return null;
+};
 
-  if (keyboardOpen && visual) {
-    lockScroll();
-    root.style.setProperty("--app-top", `${Math.round(visualOffset)}px`);
-    root.style.setProperty("--app-h", `${Math.round(visualHeight)}px`);
-    root.classList.add("keyboard-open");
+const ensureFocusedVisible = () => {
+  const el = document.activeElement;
+  if (!isTextField(el) || el.closest(".input-bar")) {
     return;
   }
 
-  root.style.setProperty("--app-top", "0px");
-  root.style.setProperty("--app-h", `${Math.round(frameHeight(inner, visualHeight, visualOffset))}px`);
-  root.classList.remove("keyboard-open");
-  lockScroll();
+  const target = (el.closest(".field, .phone-input, .auth-card") as HTMLElement | null) || el;
+  const scroller = scrollParent(el) || scrollParent(target);
+  const visual = window.visualViewport;
+  const viewTop = visual?.offsetTop ?? 0;
+  const viewBottom = viewTop + (visual?.height ?? window.innerHeight);
+  const header = document.querySelector("header.header");
+  const headerBottom = header ? header.getBoundingClientRect().bottom : viewTop;
+  const topLimit = Math.max(viewTop, headerBottom) + FIELD_PAD;
+  const bottomLimit = viewBottom - FIELD_PAD;
+
+  const shift = (delta: number) => {
+    if (Math.abs(delta) < 1) {
+      return;
+    }
+    if (scroller) {
+      scroller.scrollTop += delta;
+      return;
+    }
+    target.scrollIntoView({ block: delta > 0 ? "end" : "center", inline: "nearest" });
+  };
+
+  const rect = () => target.getBoundingClientRect();
+  let box = rect();
+  if (box.bottom > bottomLimit) {
+    shift(box.bottom - bottomLimit);
+    box = rect();
+  }
+  if (box.top < topLimit) {
+    shift(-(topLimit - box.top));
+  }
 };
 
 export const useViewportLock = () => {
   useEffect(() => {
-    applyViewport();
-    const visual = window.visualViewport;
-    const onFocus = () => {
-      applyViewport();
-      [50, 180, 350, 550].forEach((ms) => window.setTimeout(applyViewport, ms));
+    let restingHeight = 0;
+    let revealTimer = 0;
+    const timers: number[] = [];
+
+    const updateResting = (inner: number, visualHeight: number, visualOffset: number) => {
+      const next = frameHeight(inner, visualHeight, visualOffset);
+      if (!restingHeight || next >= restingHeight - 8) {
+        restingHeight = next;
+      }
     };
 
-    window.addEventListener("resize", applyViewport);
-    window.addEventListener("orientationchange", applyViewport);
-    visual?.addEventListener("resize", applyViewport);
-    visual?.addEventListener("scroll", applyViewport);
-    document.addEventListener("focusin", onFocus);
-    document.addEventListener("focusout", onFocus);
+    const revealFocused = () => {
+      window.cancelAnimationFrame(revealTimer);
+      revealTimer = window.requestAnimationFrame(() => {
+        revealTimer = window.requestAnimationFrame(ensureFocusedVisible);
+      });
+    };
+
+    const applyViewport = (reveal = false) => {
+      const root = document.documentElement;
+      const visual = window.visualViewport;
+      const inner = window.innerHeight;
+      const visualHeight = visual?.height ?? inner;
+      const visualOffset = visual?.offsetTop ?? 0;
+      const focused = isTextField(document.activeElement);
+      const covered = Math.max(restingHeight, inner) - visualHeight;
+      const keyboardOpen = focused && (covered > KEYBOARD_GAP || visualOffset > 10 || inner - visualHeight > KEYBOARD_GAP);
+
+      if (!keyboardOpen) {
+        updateResting(inner, visualHeight, visualOffset);
+        root.style.setProperty("--app-top", "0px");
+        root.style.setProperty("--app-h", `${Math.round(restingHeight)}px`);
+        root.classList.remove("keyboard-open");
+        lockScroll();
+        if (reveal && focused) {
+          revealFocused();
+        }
+        return;
+      }
+
+      lockScroll();
+      root.style.setProperty("--app-top", `${Math.round(visualOffset)}px`);
+      root.style.setProperty("--app-h", `${Math.round(visualHeight)}px`);
+      root.classList.add("keyboard-open");
+      if (reveal) {
+        revealFocused();
+      }
+    };
+
+    const clearTimers = () => {
+      while (timers.length) {
+        window.clearTimeout(timers.pop());
+      }
+    };
+
+    const onFocusIn = (event: FocusEvent) => {
+      clearTimers();
+      const shouldReveal = isTextField(event.target);
+      applyViewport(shouldReveal);
+      if (!shouldReveal) {
+        return;
+      }
+      [50, 180, 350, 550].forEach((ms) => {
+        timers.push(window.setTimeout(() => applyViewport(true), ms));
+      });
+    };
+
+    const onFocusOut = () => {
+      clearTimers();
+      timers.push(window.setTimeout(() => applyViewport(false), 80));
+    };
+
+    const onResize = () => applyViewport(isTextField(document.activeElement));
+    const onVisualScroll = () => applyViewport(false);
+    const onOrientation = () => {
+      restingHeight = 0;
+      applyViewport(false);
+    };
+
+    applyViewport();
+    const visual = window.visualViewport;
+    window.addEventListener("resize", onResize);
+    window.addEventListener("orientationchange", onOrientation);
+    visual?.addEventListener("resize", onResize);
+    visual?.addEventListener("scroll", onVisualScroll);
+    document.addEventListener("focusin", onFocusIn);
+    document.addEventListener("focusout", onFocusOut);
 
     return () => {
-      window.removeEventListener("resize", applyViewport);
-      window.removeEventListener("orientationchange", applyViewport);
-      visual?.removeEventListener("resize", applyViewport);
-      visual?.removeEventListener("scroll", applyViewport);
-      document.removeEventListener("focusin", onFocus);
-      document.removeEventListener("focusout", onFocus);
+      window.cancelAnimationFrame(revealTimer);
+      clearTimers();
+      window.removeEventListener("resize", onResize);
+      window.removeEventListener("orientationchange", onOrientation);
+      visual?.removeEventListener("resize", onResize);
+      visual?.removeEventListener("scroll", onVisualScroll);
+      document.removeEventListener("focusin", onFocusIn);
+      document.removeEventListener("focusout", onFocusOut);
     };
   }, []);
 };

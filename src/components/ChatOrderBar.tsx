@@ -3,10 +3,12 @@ import { useTranslation } from "react-i18next";
 import { useNavigate } from "react-router-dom";
 import { useAppSelector } from "../store/hooks";
 import type { Chat } from "../types/chat";
+import { useCategoryLabel } from "../utils/categoryI18n";
 import { chatOrderMeta, resolveChatOrder } from "../utils/chatOrder";
 
 const ChatOrderBar = ({ chat, myId }: { chat?: Chat | null; myId?: number | null }) => {
   const { t } = useTranslation();
+  const cat = useCategoryLabel();
   const navigate = useNavigate();
   const orders = useAppSelector((state) => state.live.orders);
 
@@ -34,7 +36,7 @@ const ChatOrderBar = ({ chat, myId }: { chat?: Chat | null; myId?: number | null
       <span className="chat-order-bar-text">
         <span className="chat-order-bar-title">
           {meta.id ? t("orderNumber", { n: meta.id }) : t("orders")}
-          {meta.category ? ` · ${meta.category}` : ""}
+          {meta.category ? ` · ${cat(order?.category || meta.category)}` : ""}
         </span>
         {meta.description ? <span className="chat-order-bar-desc">{meta.description}</span> : null}
       </span>

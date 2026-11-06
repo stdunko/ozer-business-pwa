@@ -34,7 +34,7 @@ export default {
   yes: "כן",
   no: "לא",
   IsWorkOnShabbat: "עובדים בשבת",
-  orderStatus1: "מחפש מבצע",
+  orderStatus1: "חדש",
   orderStatus2: "בעבודה",
   orderStatus3: "הושלם",
   orderStatus0: "בוטל",

@@ -34,7 +34,7 @@ export default {
   yes: "yes",
   no: "no",
   IsWorkOnShabbat: "We work on Shabbat",
-  orderStatus1: "Looking for a performer",
+  orderStatus1: "New",
   orderStatus2: "At work",
   orderStatus3: "Completed",
   orderStatus0: "Cancelled",

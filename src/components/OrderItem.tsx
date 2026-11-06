@@ -4,6 +4,7 @@ import { useTranslation } from "react-i18next";
 import { useAppSelector } from "../store/hooks";
 import type { Order } from "../types/order";
 import { isConfirmedOrder, isNewOrder } from "../types/order";
+import { useCategoryLabel } from "../utils/categoryI18n";
 import { openOrCreateOrderChat } from "../utils/orderChat";
 import ExecutorGeo from "./ExecutorGeo";
 import NameModal from "./NameModal";
@@ -30,6 +31,7 @@ const OrderItem = ({
   onOpen,
 }: OrderItemProps) => {
   const { t } = useTranslation();
+  const cat = useCategoryLabel();
   const executor = useAppSelector((state) => state.executor);
   const [nameModalVisible, setNameModalVisible] = useState(false);
   const [confirmCancel, setConfirmCancel] = useState(false);
@@ -79,20 +81,26 @@ const OrderItem = ({
     <div className="order-card">
       <div className="order-top">
         {onOpen ? (
-          <button type="button" className="order-open" onClick={onOpen} aria-label={t("openOrder")}>
-            <span>
-              <div className="order-no">{t("orderNumber", { n: item.id })}</div>
-              <div className="order-cat">{item.category?.name}</div>
-            </span>
-            <ChevronRight size={18} className="order-open-chevron" />
+          <button type="button" className="order-no" onClick={onOpen}>
+            {t("orderNumber", { n: item.id })}
           </button>
         ) : (
-          <div>
-            <div className="order-no">{t("orderNumber", { n: item.id })}</div>
-            <div className="order-cat">{item.category?.name}</div>
-          </div>
+          <div className="order-no">{t("orderNumber", { n: item.id })}</div>
         )}
         <span className={`badge ${statusClass}`}>{statusLabel}</span>
+        {onOpen ? (
+          <button type="button" className="order-cat" onClick={onOpen}>
+            {cat(item.category)}
+          </button>
+        ) : (
+          <div className="order-cat">{cat(item.category)}</div>
+        )}
+        {onOpen ? (
+          <button type="button" className="order-open-link" onClick={onOpen}>
+            {t("openOrder")}
+            <ChevronRight size={16} className="order-open-chevron" />
+          </button>
+        ) : null}
       </div>
       <p className="order-desc">{item.description}</p>
       <button type="button" className="geo-btn" onClick={() => setVisibleGeoId(isGeoVisible ? null : item.id)}>

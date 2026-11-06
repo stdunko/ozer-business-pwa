@@ -11,6 +11,7 @@ import { setExecutorPhoto } from "../store/executorSlice";
 import type { Chat } from "../types/chat";
 import type { Order } from "../types/order";
 import { getChatTimestampMs } from "../utils/chat";
+import { categoryLabel } from "../utils/categoryI18n";
 import { ORDERS_POLL_INTERVAL_MS, reportNewIncomingOrders } from "../utils/orderSync";
 import { notifyIfHidden } from "./usePushNotifications";
 
@@ -45,7 +46,7 @@ const unreadFromChats = (chats: Chat[], myId: number) => {
 
 export const useLiveSync = () => {
   const dispatch = useAppDispatch();
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
   const { showApiError, showInfo } = useNotifier();
   const token = useAppSelector((state) => state.authorization.token);
   const executorId = useAppSelector((state) => state.executor.id);
@@ -79,7 +80,7 @@ export const useLiveSync = () => {
       const nextOrders = response.data as Order[];
       if (silent) {
         reportNewIncomingOrders(ordersRef.current, nextOrders, (order) => {
-          const title = order.category?.name || "OzerilBusiness";
+          const title = categoryLabel(order.category, i18n.language) || "OzerilBusiness";
           const message = t("newOrder");
           showInfo(message);
           notifyIfHidden(title, message, "/app/orders");
@@ -87,7 +88,7 @@ export const useLiveSync = () => {
       }
       dispatch(setOrders(nextOrders));
     },
-    [dispatch, showApiError, showInfo, t, token]
+    [dispatch, i18n.language, showApiError, showInfo, t, token]
   );
 
   useEffect(() => {

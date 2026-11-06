@@ -1,6 +1,7 @@
 import { useTranslation } from "react-i18next";
 import type { OrderFilterStatus, OrderFiltersState } from "../types/order";
 import type { OrderCategoryOption } from "../utils/orderUtils";
+import { useCategoryLabel } from "../utils/categoryI18n";
 import CategoryIcon from "./CategoryIcon";
 
 type OrderFilterCarouselsProps = {
@@ -21,6 +22,7 @@ const statusLabel = (status: OrderFilterStatus | "ALL", t: (key: string) => stri
 
 const OrderFilterCarousels = ({ filters, categories, onChange }: OrderFilterCarouselsProps) => {
   const { t } = useTranslation();
+  const cat = useCategoryLabel();
 
   return (
     <div className="order-quick-filters">
@@ -68,7 +70,7 @@ const OrderFilterCarousels = ({ filters, categories, onChange }: OrderFilterCaro
                 <span className="chip-icon">
                   <CategoryIcon iconUrl={category.icon} categoryName={category.name} size={14} />
                 </span>
-                {category.name}
+                {cat(category)}
               </button>
             ))}
           </div>

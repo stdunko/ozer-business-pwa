@@ -5,7 +5,7 @@ export const PUSH_TEXTS: Record<PushLang, Record<PushKey, string>> = {
   ru: {
     newOrder: "Новый заказ",
     newMessage: "Новое сообщение",
-    orderStatus1: "Ищем исполнителя",
+    orderStatus1: "Новый",
     orderStatus2: "В работе",
     orderStatus3: "Выполнен",
     orderStatus0: "Отменен",
@@ -13,7 +13,7 @@ export const PUSH_TEXTS: Record<PushLang, Record<PushKey, string>> = {
   en: {
     newOrder: "New order",
     newMessage: "New message",
-    orderStatus1: "Looking for a performer",
+    orderStatus1: "New",
     orderStatus2: "At work",
     orderStatus3: "Completed",
     orderStatus0: "Cancelled",
@@ -21,7 +21,7 @@ export const PUSH_TEXTS: Record<PushLang, Record<PushKey, string>> = {
   he: {
     newOrder: "הזמנה חדשה",
     newMessage: "הודעה חדשה",
-    orderStatus1: "מחפש מבצע",
+    orderStatus1: "חדש",
     orderStatus2: "בעבודה",
     orderStatus3: "הושלם",
     orderStatus0: "בוטל",
@@ -29,7 +29,7 @@ export const PUSH_TEXTS: Record<PushLang, Record<PushKey, string>> = {
   ar: {
     newOrder: "طلب جديد",
     newMessage: "رسالة جديدة",
-    orderStatus1: "تبحث عن فنان",
+    orderStatus1: "جديد",
     orderStatus2: "في العمل",
     orderStatus3: "اكتمل",
     orderStatus0: "ألغيت",
@@ -41,6 +41,7 @@ const ENGLISH_TO_KEY: Record<string, PushKey> = {
   "New message": "newMessage",
   "Looking for an executor": "orderStatus1",
   "Looking for a performer": "orderStatus1",
+  New: "orderStatus1",
   "In progress": "orderStatus2",
   "At work": "orderStatus2",
   "Completed": "orderStatus3",

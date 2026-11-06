@@ -21,6 +21,7 @@ import IsWorkOnShabbat from "../components/IsWorkOnShabbat";
 import MapView from "../components/MapView";
 import PrimaryButton from "../components/PrimaryButton";
 import type { CategoryType } from "../types/category";
+import { useCategoryLabel } from "../utils/categoryI18n";
 import { validateProfileForm, type ProfileFieldKey } from "../utils/profileValidation";
 
 const sameIds = (left: CategoryType[], right: CategoryType[]) => {
@@ -30,7 +31,8 @@ const sameIds = (left: CategoryType[], right: CategoryType[]) => {
 };
 
 const ProfileScreen = () => {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
+  const cat = useCategoryLabel();
   const navigate = useNavigate();
   const dispatch = useAppDispatch();
   const { showApiError, showSuccess } = useNotifier();
@@ -58,8 +60,11 @@ const ProfileScreen = () => {
   const fileRef = useRef<HTMLInputElement>(null);
 
   const filteredCategories = useMemo(
-    () => allCategories.filter((category) => !updatedCategories.some((item) => item.id === category.id)),
-    [allCategories, updatedCategories]
+    () =>
+      allCategories
+        .filter((category) => !updatedCategories.some((item) => item.id === category.id))
+        .sort((a, b) => cat(a).localeCompare(cat(b), i18n.language)),
+    [allCategories, cat, i18n.language, updatedCategories]
   );
 
   useEffect(() => {
@@ -335,7 +340,7 @@ const ProfileScreen = () => {
                     clearFieldError("categories");
                   }}
                 >
-                  {item.name}
+                  {cat(item)}
                   <X size={12} />
                 </button>
               ))}
