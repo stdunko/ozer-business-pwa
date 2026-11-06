@@ -384,7 +384,8 @@ img {
 .logo {
   width: 140px;
   height: 140px;
-  object-fit: contain;
+  object-fit: cover;
+  border-radius: 32px;
   margin-bottom: 24px;
 }
 

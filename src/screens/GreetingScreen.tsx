@@ -19,7 +19,7 @@ const GreetingScreen = () => {
         <InstallBanner />
         <PrimaryButton title={t("logInButtonText")} onPress={() => navigate("/login/phone")} />
         <div style={{ textAlign: "center", padding: "24px 0 8px" }}>
-          <img src="/favicon.png" alt="" width={36} height={36} style={{ opacity: 0.6 }} />
+          <img src="/favicon.png" alt="" width={36} height={36} style={{ opacity: 0.6, borderRadius: 8 }} />
         </div>
       </div>
     </div>
