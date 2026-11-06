@@ -30,6 +30,30 @@ export function subscribeInstallPrompt(listener: (event: BeforeInstallPromptEven
   };
 }
 
+export function getDeferredPrompt() {
+  return deferred;
+}
+
+export function waitForInstallPrompt(ms = 2500) {
+  if (deferred) {
+    return Promise.resolve(deferred);
+  }
+  return new Promise<BeforeInstallPromptEvent | null>((resolve) => {
+    let done = false;
+    const finish = (value: BeforeInstallPromptEvent | null) => {
+      if (done) return;
+      done = true;
+      window.clearTimeout(timer);
+      unsub();
+      resolve(value);
+    };
+    const timer = window.setTimeout(() => finish(deferred), ms);
+    const unsub = subscribeInstallPrompt((event) => {
+      if (event) finish(event);
+    });
+  });
+}
+
 export function isStandalone() {
   return (
     window.matchMedia("(display-mode: standalone)").matches ||

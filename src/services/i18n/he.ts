@@ -92,6 +92,7 @@ export default {
   onboardingSlide3Desc: "דברו עם הלקוחות ישירות באפליקציה",
   locationDenied: "המיקום אינו זמין. סמנו נקודה על המפה ידנית.",
   installApp: "התקן אפליקציה",
+  installAdd: "הוסף",
   installTitle: "הוספה למסך הבית",
   installLeadAndroid: "התקינו את האפליקציה כדי לפתוח אותה ממסך הבית — בלי שורת הדפדפן.",
   installLeadIos: "הוסיפו את האפליקציה למסך הבית כדי שתיפתח כמו אפליקציה רגילה.",

@@ -92,6 +92,7 @@ export default {
   onboardingSlide3Desc: "Talk to customers directly in the app",
   locationDenied: "Location is unavailable. Set the point on the map manually.",
   installApp: "Install app",
+  installAdd: "Add",
   installTitle: "Add to Home Screen",
   installLeadAndroid: "Install the app to open it from the home screen — without the browser bar.",
   installLeadIos: "Add the app to the home screen so it opens like a regular app.",
