@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useState, type ReactNode } from "react";
+import { createPortal } from "react-dom";
 import { Search, X } from "lucide-react";
 import { useTranslation } from "react-i18next";
 import PrimaryButton from "./PrimaryButton";
@@ -104,7 +105,7 @@ const OrderFiltersModal = ({
     setDraft((prev) => ({ ...prev, [key]: value }));
   };
 
-  return (
+  return createPortal(
     <div className="modal-backdrop" onClick={onClose}>
       <div className="sheet filters-sheet" onClick={(e) => e.stopPropagation()}>
         <div className="handle" />
@@ -220,7 +221,8 @@ const OrderFiltersModal = ({
           </button>
         </div>
       </div>
-    </div>
+    </div>,
+    document.body
   );
 };
 

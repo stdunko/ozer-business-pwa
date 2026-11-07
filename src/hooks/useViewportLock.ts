@@ -78,11 +78,21 @@ const ensureFocusedVisible = () => {
     if (Math.abs(delta) < 1) {
       return;
     }
+    const smooth = delta < 0;
     if (scroller) {
-      scroller.scrollTop += delta;
+      const top = Math.max(0, scroller.scrollTop + delta);
+      if (smooth && typeof scroller.scrollTo === "function") {
+        scroller.scrollTo({ top, behavior: "smooth" });
+        return;
+      }
+      scroller.scrollTop = top;
       return;
     }
-    target.scrollIntoView({ block: delta > 0 ? "end" : "center", inline: "nearest" });
+    target.scrollIntoView({
+      block: delta > 0 ? "end" : "center",
+      inline: "nearest",
+      behavior: smooth ? "smooth" : "auto",
+    });
   };
 
   const rect = () => target.getBoundingClientRect();
