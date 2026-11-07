@@ -1514,19 +1514,24 @@ html[dir="rtl"] .bubble.in {
   inset: 0;
   background: rgba(0, 0, 0, 0.45);
   z-index: 80;
-  display: flex;
-  align-items: flex-end;
-  justify-content: center;
-  animation: fadein 0.28s ease;
+  overflow: hidden;
+  animation: overlay-fade 0.2s ease;
 }
 
 .modal-backdrop.center {
+  display: flex;
   align-items: center;
+  justify-content: center;
 }
 
 .sheet {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
   width: 100%;
   max-width: 480px;
+  margin-inline: auto;
   background: var(--surface);
   border-top-left-radius: var(--radius-xl);
   border-top-right-radius: var(--radius-xl);
@@ -1534,15 +1539,32 @@ html[dir="rtl"] .bubble.in {
   display: flex;
   flex-direction: column;
   padding-bottom: var(--safe-bottom);
-  animation: sheet-up 0.34s cubic-bezier(0.32, 0.72, 0, 1);
+  animation: sheet-up 0.32s cubic-bezier(0.32, 0.72, 0, 1) both;
+}
+
+.modal-backdrop.center .sheet {
+  position: relative;
+  left: auto;
+  right: auto;
+  bottom: auto;
+  animation: overlay-fade 0.2s ease;
+}
+
+@keyframes overlay-fade {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
 }
 
 @keyframes sheet-up {
   from {
-    transform: translate3d(0, 100%, 0);
+    transform: translateY(100%);
   }
   to {
-    transform: translate3d(0, 0, 0);
+    transform: translateY(0);
   }
 }
 
