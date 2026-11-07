@@ -18,7 +18,9 @@ const OnboardingScreen = ({ onComplete }: { onComplete: () => void }) => {
     return (
       <div className="screen screen-surface pad-lg status-bar-fill">
         <div className="center-col">
-          <img src="/logo.png" alt="OzerilBusiness" className="logo" />
+          <div className="auth-hero-icon">
+            <div className="auth-hero-mark" aria-hidden="true" />
+          </div>
           <h1 className="title-lg">{t("onboardingWelcomeTitle")}</h1>
           <p className="subtitle">{t("onboardingWelcomeSubtitle")}</p>
           <LanguagePicker selectedCode={i18n.language} />
