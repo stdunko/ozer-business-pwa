@@ -93,7 +93,7 @@ export default {
   noMessages: "لا توجد رسائل",
   image: "صورة",
   chatPlaceholder: "رسالة...",
-  chatEmpty: "ابدأ المحادثة — أرسل الرسالة الأولى",
+  chatEmpty: "ابدأ المحادثة\nأرسل الرسالة الأولى",
   cancel: "إلغاء",
   errorNetwork: "لا يوجد إنترنت. تحقق من الاتصال وحاول مرة أخرى.",
   errorGeneric: "حدث خطأ ما. حاول مرة أخرى.",

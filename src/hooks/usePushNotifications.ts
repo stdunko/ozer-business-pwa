@@ -19,10 +19,10 @@ const showLocalNotification = (title: string, body: string, url = "/app/orders")
   if (!("Notification" in window) || Notification.permission !== "granted") {
     return;
   }
-  const notification = new Notification(title, { body, icon: "/icon-192.png" });
+  const notification = new Notification(title, { body, icon: "/icon-192.png", tag: url, data: { url } });
   notification.onclick = () => {
     window.focus();
-    window.location.href = url;
+    window.dispatchEvent(new CustomEvent("ozer-navigate", { detail: { url } }));
     notification.close();
   };
 };

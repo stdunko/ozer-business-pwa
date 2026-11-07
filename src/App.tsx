@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { useViewportLock } from "./hooks/useViewportLock";
-import { Navigate, Route, Routes, useNavigate } from "react-router-dom";
+import { Navigate, Route, Routes, useLocation, useNavigate } from "react-router-dom";
 import { useAppDispatch, useAppSelector } from "./store/hooks";
 import { setToken } from "./store/authSlice";
 import { emptyExecutor, setExecutor } from "./store/executorSlice";
@@ -21,25 +21,62 @@ import ChatListScreen from "./screens/ChatListScreen";
 import ChatScreen from "./screens/ChatScreen";
 import AboutScreen from "./screens/AboutScreen";
 import InstallBanner from "./components/InstallBanner";
+import { appPathFromUrl, NAVIGATE_EVENT, peekPendingPath, rememberPendingPath, takePendingPath } from "./utils/deepLink";
 
 const SwNavigation = () => {
   const navigate = useNavigate();
+  const token = useAppSelector((state) => state.authorization.token);
 
   useEffect(() => {
-    if (!("serviceWorker" in navigator)) {
-      return;
-    }
+    const go = (raw?: string) => {
+      const path = appPathFromUrl(raw);
+      if (!path.startsWith("/app")) {
+        return;
+      }
+      if (!token) {
+        rememberPendingPath(path);
+        return;
+      }
+      navigate(path);
+    };
     const onMessage = (event: MessageEvent) => {
       if (event.data?.type === "NAVIGATE" && typeof event.data.url === "string") {
-        const path = event.data.url.replace(window.location.origin, "") || "/app/orders";
-        navigate(path);
+        go(event.data.url);
       }
     };
-    navigator.serviceWorker.addEventListener("message", onMessage);
-    return () => navigator.serviceWorker.removeEventListener("message", onMessage);
-  }, [navigate]);
+    const onNavigate = (event: Event) => {
+      const url = (event as CustomEvent<{ url?: string }>).detail?.url;
+      go(url);
+    };
+    if ("serviceWorker" in navigator) {
+      navigator.serviceWorker.addEventListener("message", onMessage);
+    }
+    window.addEventListener(NAVIGATE_EVENT, onNavigate);
+    return () => {
+      navigator.serviceWorker?.removeEventListener("message", onMessage);
+      window.removeEventListener(NAVIGATE_EVENT, onNavigate);
+    };
+  }, [navigate, token]);
 
   return null;
+};
+
+const AuthedFallback = ({ home }: { home: string }) => {
+  const pending = peekPendingPath();
+  useEffect(() => {
+    if (pending) {
+      takePendingPath();
+    }
+  }, [pending]);
+  return <Navigate to={pending || home} replace />;
+};
+
+const GuestRedirect = () => {
+  const location = useLocation();
+  useEffect(() => {
+    rememberPendingPath(`${location.pathname}${location.search}`);
+  }, [location.pathname, location.search]);
+  return <Navigate to="/login" replace />;
 };
 
 const App = () => {
@@ -119,7 +156,7 @@ const App = () => {
             <Route path="/login" element={<GreetingScreen />} />
             <Route path="/login/phone" element={<EnterNumberScreen />} />
             <Route path="/login/otp" element={<EnterOtpScreen />} />
-            <Route path="*" element={<Navigate to="/login" replace />} />
+            <Route path="*" element={<GuestRedirect />} />
           </>
         ) : (
           <>
@@ -131,7 +168,7 @@ const App = () => {
               <Route path="chats/:chatId" element={<ChatScreen />} />
               <Route path="about" element={<AboutScreen />} />
             </Route>
-            <Route path="*" element={<Navigate to="/app/orders" replace />} />
+            <Route path="*" element={<AuthedFallback home="/app/orders" />} />
           </>
         )}
       </Routes>

@@ -16,6 +16,7 @@ import {
   where,
   writeBatch,
 } from "firebase/firestore";
+import { notifyChatPush } from "../services/api";
 import { db } from "../firebase";
 import { useAppDispatch, useAppSelector } from "../store/hooks";
 import { setChatUnread } from "../store/liveSlice";
@@ -70,7 +71,7 @@ const ChatScreen = () => {
   const anotherUser = chat?.participants?.find(
     (member) => (member.id ?? member.user_id ?? member.executor_id) !== executor.id
   );
-  const recipientId = anotherUser?.id ?? anotherUser?.user_id ?? anotherUser?.executor_id;
+  const recipientId = anotherUser?.user_id ?? anotherUser?.id ?? anotherUser?.executor_id;
   const title = chat?.participants?.find((p) => p.user_id)?.name ?? t("chats");
 
   const markAsReadForRecipient = useCallback(async () => {
@@ -171,6 +172,15 @@ const ChatScreen = () => {
         [`unread.${String(executor.id)}`]: 0,
         ...(recipientId != null ? { [`unread.${String(recipientId)}`]: increment(1) } : {}),
       });
+      if (recipientId != null && Number.isFinite(Number(recipientId))) {
+        void notifyChatPush({
+          chatId,
+          recipientId: Number(recipientId),
+          to: "user",
+          title: executor.name || executor.phone || "OzerilBusiness",
+          preview: payloadText || t("image"),
+        });
+      }
     } finally {
       setSendingIds((prev) => prev.filter((id) => id !== tempId));
     }
@@ -201,11 +211,11 @@ const ChatScreen = () => {
       />
       <ChatOrderBar chat={chat} myId={executor.id} />
       {chronological.length === 0 ? (
-        <div className="center-col">
-          <div className="category-icon" style={{ width: 72, height: 72, borderRadius: 36, marginBottom: 16 }}>
-            <MessageCircle size={40} />
+        <div className="center-col chat-empty-wrap">
+          <div className="empty-icon">
+            <MessageCircle size={32} />
           </div>
-          <p className="subtitle">{t("chatEmpty")}</p>
+          <p className="chat-empty-text">{t("chatEmpty")}</p>
         </div>
       ) : (
         <div className="messages" ref={listRef}>

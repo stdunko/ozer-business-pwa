@@ -152,6 +152,73 @@ img {
   height: 100%;
   overflow: hidden;
   background: var(--background);
+  animation: screen-fade 0.18s ease;
+}
+
+.nav-forward > .screen {
+  animation: screen-forward 0.22s ease;
+}
+
+.nav-back > .screen {
+  animation: screen-back 0.22s ease;
+}
+
+.nav-tab > .screen {
+  animation: screen-fade 0.16s ease;
+}
+
+html.keyboard-open .screen {
+  animation: none;
+}
+
+html[dir="rtl"] .nav-forward > .screen {
+  animation-name: screen-back;
+}
+
+html[dir="rtl"] .nav-back > .screen {
+  animation-name: screen-forward;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .screen,
+  .nav-forward > .screen,
+  .nav-back > .screen,
+  .nav-tab > .screen,
+  .sheet,
+  .modal-backdrop {
+    animation: none;
+  }
+}
+
+@keyframes screen-fade {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes screen-forward {
+  from {
+    opacity: 0;
+    transform: translate3d(14px, 0, 0);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+@keyframes screen-back {
+  from {
+    opacity: 0;
+    transform: translate3d(-14px, 0, 0);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
 }
 
 .screen-surface {
@@ -320,6 +387,16 @@ img {
   background: var(--primary-light);
 }
 
+.btn,
+.chip,
+.icon-btn,
+.tabbar a,
+.order-card,
+.picker-row,
+.flag-btn {
+  transition: background-color 0.15s ease, color 0.15s ease, border-color 0.15s ease, opacity 0.15s ease;
+}
+
 .btn {
   width: 100%;
   min-height: 50px;
@@ -453,6 +530,22 @@ img {
   align-items: center;
   justify-content: center;
   text-align: center;
+}
+
+.chat-empty-wrap {
+  gap: 8px;
+  padding: 24px;
+}
+
+.chat-empty-text {
+  max-width: 220px;
+  margin: 0;
+  padding: 0;
+  font-size: 15px;
+  line-height: 1.35;
+  color: var(--text-secondary);
+  text-align: center;
+  white-space: pre-line;
 }
 
 .logo {
@@ -1424,6 +1517,7 @@ html[dir="rtl"] .bubble.in {
   display: flex;
   align-items: flex-end;
   justify-content: center;
+  animation: fadein 0.18s ease;
 }
 
 .modal-backdrop.center {
@@ -1440,6 +1534,18 @@ html[dir="rtl"] .bubble.in {
   display: flex;
   flex-direction: column;
   padding-bottom: var(--safe-bottom);
+  animation: sheet-up 0.22s ease;
+}
+
+@keyframes sheet-up {
+  from {
+    transform: translateY(20px);
+    opacity: 0.7;
+  }
+  to {
+    transform: none;
+    opacity: 1;
+  }
 }
 
 .modal-card {

@@ -93,7 +93,7 @@ export default {
   noMessages: "No messages",
   image: "Image",
   chatPlaceholder: "Message...",
-  chatEmpty: "Start the conversation — send the first message",
+  chatEmpty: "Start the conversation\nSend the first message",
   cancel: "Cancel",
   errorNetwork: "No internet. Check your connection and try again.",
   errorGeneric: "Something went wrong. Try again.",

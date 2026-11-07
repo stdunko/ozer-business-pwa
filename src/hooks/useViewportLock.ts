@@ -112,8 +112,18 @@ export const useViewportLock = () => {
       });
     };
 
+    const root = document.documentElement;
+
+    const setVar = (name: string, value: number) => {
+      const current = Number.parseFloat(root.style.getPropertyValue(name));
+      if (Number.isFinite(current) && Math.abs(current - value) < 2) {
+        return false;
+      }
+      root.style.setProperty(name, `${Math.round(value)}px`);
+      return true;
+    };
+
     const applyViewport = (reveal = false) => {
-      const root = document.documentElement;
       const visual = window.visualViewport;
       const inner = window.innerHeight;
       const visualHeight = visual?.height ?? inner;
@@ -124,8 +134,8 @@ export const useViewportLock = () => {
 
       if (!keyboardOpen) {
         updateResting(inner, visualHeight, visualOffset);
-        root.style.setProperty("--app-top", "0px");
-        root.style.setProperty("--app-h", `${Math.round(restingHeight)}px`);
+        setVar("--app-top", 0);
+        setVar("--app-h", restingHeight);
         root.classList.remove("keyboard-open");
         lockScroll();
         if (reveal && focused) {
@@ -135,8 +145,8 @@ export const useViewportLock = () => {
       }
 
       lockScroll();
-      root.style.setProperty("--app-top", `${Math.round(visualOffset)}px`);
-      root.style.setProperty("--app-h", `${Math.round(visualHeight)}px`);
+      setVar("--app-top", visualOffset);
+      setVar("--app-h", visualHeight);
       root.classList.add("keyboard-open");
       if (reveal) {
         revealFocused();
@@ -166,8 +176,12 @@ export const useViewportLock = () => {
       timers.push(window.setTimeout(() => applyViewport(false), 80));
     };
 
-    const onResize = () => applyViewport(isTextField(document.activeElement));
-    const onVisualScroll = () => applyViewport(false);
+    let resizeTimer = 0;
+    const onResize = () => {
+      window.clearTimeout(resizeTimer);
+      resizeTimer = window.setTimeout(() => applyViewport(isTextField(document.activeElement)), 50);
+    };
+    const onVisualScroll = () => lockScroll();
     const onOrientation = () => {
       restingHeight = 0;
       applyViewport(false);
@@ -184,6 +198,7 @@ export const useViewportLock = () => {
 
     return () => {
       window.cancelAnimationFrame(revealTimer);
+      window.clearTimeout(resizeTimer);
       clearTimers();
       window.removeEventListener("resize", onResize);
       window.removeEventListener("orientationchange", onOrientation);

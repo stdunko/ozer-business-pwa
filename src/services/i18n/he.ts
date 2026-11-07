@@ -93,7 +93,7 @@ export default {
   noMessages: "אין הודעות",
   image: "תמונה",
   chatPlaceholder: "הודעה...",
-  chatEmpty: "התחל שיחה — שלח את ההודעה הראשונה",
+  chatEmpty: "התחל שיחה\nשלח את ההודעה הראשונה",
   cancel: "ביטול",
   errorNetwork: "אין אינטרנט. בדקו את החיבור ונסו שוב.",
   errorGeneric: "משהו השתבש. נסו שוב.",
