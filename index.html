@@ -7,8 +7,16 @@
     <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover, interactive-widget=resizes-content" />
     <script>
       (function () {
+        var ua = navigator.userAgent || "";
+        var ios = /iPad|iPhone|iPod/.test(ua) || (navigator.platform === "MacIntel" && navigator.maxTouchPoints > 1);
         var standalone = window.navigator.standalone || window.matchMedia("(display-mode: standalone)").matches;
-        var h = standalone ? Math.max(window.innerHeight, screen.height || 0) : window.innerHeight;
+        var visual = window.visualViewport;
+        var h = window.innerHeight;
+        if (standalone && ios) {
+          h = Math.max(h, screen.height || 0);
+        } else if (visual && visual.height) {
+          h = visual.height + (visual.offsetTop || 0);
+        }
         var root = document.documentElement;
         root.style.setProperty("--app-h", h + "px");
         root.style.setProperty("--app-top", "0px");

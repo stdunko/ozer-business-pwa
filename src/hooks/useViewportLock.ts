@@ -7,6 +7,10 @@ const isStandalone = () =>
   window.matchMedia("(display-mode: standalone)").matches ||
   Boolean((window.navigator as Navigator & { standalone?: boolean }).standalone);
 
+const isIos = () =>
+  /iPad|iPhone|iPod/.test(navigator.userAgent) ||
+  (navigator.platform === "MacIntel" && navigator.maxTouchPoints > 1);
+
 const isTextField = (el: EventTarget | null): el is HTMLElement => {
   if (!(el instanceof HTMLElement)) {
     return false;
@@ -34,11 +38,11 @@ const lockScroll = () => {
 };
 
 const frameHeight = (inner: number, visualHeight: number, visualOffset: number) => {
-  const candidates = [inner, visualHeight + visualOffset];
-  if (isStandalone()) {
-    candidates.push(window.screen.height || 0, window.screen.availHeight || 0);
+  const visible = visualHeight + visualOffset;
+  if (isStandalone() && isIos()) {
+    return Math.max(inner, visible, window.screen.height || 0, window.screen.availHeight || 0);
   }
-  return Math.max(...candidates);
+  return visible > 0 ? visible : inner;
 };
 
 const scrollParent = (el: HTMLElement) => {
@@ -100,7 +104,14 @@ export const useViewportLock = () => {
 
     const updateResting = (inner: number, visualHeight: number, visualOffset: number) => {
       const next = frameHeight(inner, visualHeight, visualOffset);
-      if (!restingHeight || next >= restingHeight - 8) {
+      if (!restingHeight) {
+        restingHeight = next;
+        return;
+      }
+      if (Math.abs(next - restingHeight) < 8) {
+        return;
+      }
+      if (next > restingHeight || !isTextField(document.activeElement)) {
         restingHeight = next;
       }
     };

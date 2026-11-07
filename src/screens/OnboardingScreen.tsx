@@ -16,7 +16,7 @@ const OnboardingScreen = ({ onComplete }: { onComplete: () => void }) => {
 
   if (step === 0) {
     return (
-      <div className="screen screen-surface pad-lg status-bar-fill">
+      <div className="screen screen-surface pad-lg status-bar-fill onboarding-screen">
         <div className="center-col">
           <div className="auth-hero-icon">
             <div className="auth-hero-mark" aria-hidden="true" />
@@ -40,7 +40,7 @@ const OnboardingScreen = ({ onComplete }: { onComplete: () => void }) => {
   const isLast = step === 3;
 
   return (
-    <div className="screen screen-surface pad-lg status-bar-fill">
+    <div className="screen screen-surface pad-lg status-bar-fill onboarding-screen">
       {isLast ? (
         <div style={{ height: 36 }} />
       ) : (

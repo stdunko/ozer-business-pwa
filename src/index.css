@@ -1956,6 +1956,57 @@ html[dir="rtl"] .filter-carousel {
   margin-bottom: 24px;
 }
 
+.onboarding-screen {
+  min-height: 0;
+}
+
+.onboarding-screen .center-col {
+  min-height: 0;
+  width: 100%;
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
+}
+
+.onboarding-screen > .btn {
+  flex-shrink: 0;
+  margin-top: 12px;
+}
+
+.onboarding-screen .subtitle {
+  margin-bottom: 12px;
+}
+
+.onboarding-screen .auth-hero-icon {
+  margin-bottom: 12px;
+}
+
+@media (max-height: 720px) {
+  .onboarding-screen .auth-hero-icon {
+    width: 72px;
+    height: 72px;
+    border-radius: 22px;
+  }
+
+  .onboarding-screen .auth-hero-mark {
+    width: 42px;
+    height: 42px;
+    border-width: 8px;
+  }
+
+  .onboarding-screen .title-lg {
+    font-size: 22px;
+  }
+
+  .onboarding-screen .lang-item {
+    padding: 10px 8px;
+  }
+
+  .onboarding-screen .lang-flag {
+    font-size: 24px;
+    line-height: 28px;
+  }
+}
+
 .title-lg {
   font-size: 26px;
   font-weight: 700;
