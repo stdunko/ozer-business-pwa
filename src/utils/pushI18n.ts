@@ -98,5 +98,43 @@ export const notifyServiceWorkerLanguage = (language: string) => {
     .catch(() => undefined);
 };
 
-export const withPushLanguage = (subscription: PushSubscription, language: string) =>
-  JSON.stringify({ ...subscription.toJSON(), language: normalizePushLang(language) });
+export type PushPrefs = {
+  orders: boolean;
+  chats: boolean;
+};
+
+export const PUSH_PREFS_KEY = "ozer-biz-push-prefs";
+export const PUSH_PREFS_EVENT = "ozer-push-prefs";
+
+export const defaultPushPrefs = (): PushPrefs => ({ orders: true, chats: true });
+
+export const readPushPrefs = (): PushPrefs => {
+  try {
+    const raw = localStorage.getItem(PUSH_PREFS_KEY);
+    if (!raw) return defaultPushPrefs();
+    const parsed = JSON.parse(raw) as Partial<PushPrefs>;
+    return {
+      orders: parsed.orders !== false,
+      chats: parsed.chats !== false,
+    };
+  } catch {
+    return defaultPushPrefs();
+  }
+};
+
+export const savePushPrefs = (prefs: PushPrefs) => {
+  localStorage.setItem(PUSH_PREFS_KEY, JSON.stringify(prefs));
+  window.dispatchEvent(new Event(PUSH_PREFS_EVENT));
+};
+
+export const withPushLanguage = (
+  subscription: PushSubscription,
+  language: string,
+  prefs: PushPrefs = readPushPrefs(),
+) =>
+  JSON.stringify({
+    ...subscription.toJSON(),
+    language: normalizePushLang(language),
+    notifyOrders: prefs.orders,
+    notifyChats: prefs.chats,
+  });

@@ -3,7 +3,7 @@ import { useTranslation } from "react-i18next";
 import { updateExecutorPushSubscription } from "../services/api";
 import { appConfig } from "../config";
 import { useAppSelector } from "../store/hooks";
-import { notifyServiceWorkerLanguage, withPushLanguage } from "../utils/pushI18n";
+import { notifyServiceWorkerLanguage, PUSH_PREFS_EVENT, readPushPrefs, withPushLanguage } from "../utils/pushI18n";
 
 const urlBase64ToUint8Array = (base64: string) => {
   const padding = "=".repeat((4 - (base64.length % 4)) % 4);
@@ -27,7 +27,10 @@ const showLocalNotification = (title: string, body: string, url = "/app/orders")
   };
 };
 
-export const notifyIfHidden = (title: string, body: string, url?: string) => {
+export const notifyIfHidden = (title: string, body: string, url?: string, kind?: "orders" | "chats") => {
+  if (kind && !readPushPrefs()[kind]) {
+    return;
+  }
   if (document.visibilityState === "hidden") {
     showLocalNotification(title, body, url);
   }
@@ -72,6 +75,11 @@ export const usePushNotifications = () => {
       await updateExecutorPushSubscription(executorId, withPushLanguage(subscription, language));
     };
 
-    void register().catch((error) => console.error("Web Push:", error));
+    const onPrefs = () => {
+      void register().catch((error) => console.error("Web Push:", error));
+    };
+    onPrefs();
+    window.addEventListener(PUSH_PREFS_EVENT, onPrefs);
+    return () => window.removeEventListener(PUSH_PREFS_EVENT, onPrefs);
   }, [executorId, language, token]);
 };

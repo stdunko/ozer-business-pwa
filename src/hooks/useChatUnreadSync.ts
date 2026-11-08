@@ -47,7 +47,7 @@ export const useChatUnreadSync = (myId?: number, fallbackName = "OzerilBusiness"
           const chat = chatsRef.current.find((item) => item.id === chatId);
           const title = chat ? otherName(chat, myId, fallbackName) : fallbackName;
           const body = String(messages[0]?.text || messages[0]?.image || title);
-          notifyIfHidden(title, body, `/app/chats/${chatId}`);
+          notifyIfHidden(title, body, `/app/chats/${chatId}`, "chats");
         }
         prevUnread.current[chatId] = unreadCount;
       });

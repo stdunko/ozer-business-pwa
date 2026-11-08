@@ -20,6 +20,7 @@ import CategoryModal from "../components/CategoryModal";
 import IsWorkOnShabbat from "../components/IsWorkOnShabbat";
 import MapView from "../components/MapView";
 import PrimaryButton from "../components/PrimaryButton";
+import PushSettings from "../components/PushSettings";
 import type { CategoryType } from "../types/category";
 import { useCategoryLabel } from "../utils/categoryI18n";
 import { validateProfileForm, type ProfileFieldKey } from "../utils/profileValidation";
@@ -391,6 +392,8 @@ const ProfileScreen = () => {
           />
           <AppTextInput icon={Home} value={adress} onChange={(e) => setAdress(e.target.value)} placeholder={t("address")} />
         </div>
+
+        <PushSettings />
 
         {formError ? <p className="error-text" style={{ textAlign: "center" }}>{formError}</p> : null}
         <div className="profile-actions">
